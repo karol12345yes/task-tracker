@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VS Code Task Tracker (Firebase)</title>
+    <title>VS Code Task Tracker (Username Login)</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -165,9 +165,7 @@
         <div id="auth-section">
             <h2 id="auth-title">Login / Register</h2>
             <form id="auth-form">
-                <input type="text" id="username-input" placeholder="Choose a Username" required style="display:none;"> 
-                
-                <input type="email" id="email" placeholder="Your Email Address" required> 
+                <input type="text" id="username-input" placeholder="Username" required> 
                 <input type="password" id="password" placeholder="Password" required>
                 <button type="submit" id="auth-button">Log In</button>
                 <button type="button" id="switch-button">Need an account? Register</button>
@@ -200,18 +198,23 @@
     document.addEventListener('DOMContentLoaded', () => {
         // --- FIREBASE CONFIGURATION (!! REPLACE THESE WITH YOUR DETAILS !!) ---
         const firebaseConfig = {
-  apiKey: "AIzaSyD84yJk7wo4_7JvqAuMG8yst5RQnL-IwO0",
-  authDomain: "task-tracker-241ab.firebaseapp.com",
-  projectId: "task-tracker-241ab",
-  storageBucket: "task-tracker-241ab.firebasestorage.app",
-  messagingSenderId: "527187861224",
-  appId: "1:527187861224:web:ca72ebd72a5e63ff3eb35d"
-};
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const auth = app.auth();
         const db = app.firestore();
         // ------------------------------------------------------------
+        
+        // --- CONSTANTS ---
+        // Dummy domain used to create a unique, non-functional email for Firebase Auth
+        const DUMMY_DOMAIN = '@tasktracker.app'; 
+        // ---------------
 
         const authSection = document.getElementById('auth-section');
         const appSection = document.getElementById('app-section');
@@ -230,7 +233,6 @@
         const clearBtn = document.getElementById('clear-btn');
         
         const usernameInput = document.getElementById('username-input');
-        const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
 
         let isRegisterMode = false;
@@ -245,28 +247,26 @@
             authButton.textContent = isRegisterMode ? 'Register' : 'Log In';
             switchButton.textContent = isRegisterMode ? 'Already have an account? Log In' : 'Need an account? Register';
             authMessage.textContent = '';
-            
-            // Show/hide username input based on mode
-            usernameInput.style.display = isRegisterMode ? 'block' : 'none';
-            usernameInput.required = isRegisterMode;
         });
         
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             authMessage.textContent = '';
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
             const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!username) {
+                authMessage.style.color = 'red';
+                authMessage.textContent = 'Username is required.';
+                return;
+            }
+
+            // Create the hidden email credential
+            const hiddenEmail = username + DUMMY_DOMAIN;
 
             if (isRegisterMode) {
-                if (!username) {
-                    authMessage.style.color = 'red';
-                    authMessage.textContent = 'Please choose a username.';
-                    return;
-                }
-                
                 try {
-                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    const userCredential = await auth.createUserWithEmailAndPassword(hiddenEmail, password);
                     const user = userCredential.user;
                     
                     // Save the chosen username to Firestore
@@ -278,16 +278,29 @@
                     authMessage.textContent = 'Registration successful! Logging you in...';
                 } catch (error) {
                     authMessage.style.color = 'red';
-                    authMessage.textContent = `Registration failed: ${error.message}`;
+                    
+                    // Display a user-friendly message for username conflicts
+                    if (error.code === 'auth/email-already-in-use') {
+                         authMessage.textContent = 'This username is already taken.';
+                    } else {
+                         authMessage.textContent = `Registration failed: ${error.message}`;
+                    }
                 }
             } else {
+                // Login using the generated dummy email
                 try {
-                    await auth.signInWithEmailAndPassword(email, password);
+                    await auth.signInWithEmailAndPassword(hiddenEmail, password);
                     authMessage.style.color = 'green';
                     authMessage.textContent = 'Login successful!';
                 } catch (error) {
                     authMessage.style.color = 'red';
-                    authMessage.textContent = `Login failed: ${error.message}`;
+                    
+                    // Catch Firebase errors and map them to username/password errors
+                    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                        authMessage.textContent = 'Invalid username or password.';
+                    } else {
+                         authMessage.textContent = `Login failed: ${error.message}`;
+                    }
                 }
             }
         });
@@ -465,7 +478,6 @@
                 authSection.classList.remove('hidden');
                 appSection.classList.add('hidden');
                 taskList.innerHTML = '';
-                emailInput.value = '';
                 passwordInput.value = '';
                 usernameInput.value = ''; 
             }
