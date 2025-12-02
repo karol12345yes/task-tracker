@@ -165,7 +165,9 @@
         <div id="auth-section">
             <h2 id="auth-title">Login / Register</h2>
             <form id="auth-form">
-                <input type="email" id="email" placeholder="Email" required> 
+                <input type="text" id="username-input" placeholder="Choose a Username" required style="display:none;"> 
+                
+                <input type="email" id="email" placeholder="Your Email Address" required> 
                 <input type="password" id="password" placeholder="Password" required>
                 <button type="submit" id="auth-button">Log In</button>
                 <button type="button" id="switch-button">Need an account? Register</button>
@@ -196,7 +198,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- 2. FIREBASE CONFIGURATION (REPLACE THESE WITH YOUR DETAILS) ---
+        // --- FIREBASE CONFIGURATION (!! REPLACE THESE WITH YOUR DETAILS !!) ---
         const firebaseConfig = {
   apiKey: "AIzaSyD84yJk7wo4_7JvqAuMG8yst5RQnL-IwO0",
   authDomain: "task-tracker-241ab.firebaseapp.com",
@@ -226,13 +228,16 @@
         const completedCount = document.getElementById('completed-count');
         const remainingCount = document.getElementById('remaining-count');
         const clearBtn = document.getElementById('clear-btn');
+        
+        const usernameInput = document.getElementById('username-input');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
 
         let isRegisterMode = false;
         let currentUser = null; 
-        
-        // --- AUTHENTICATION LOGIC (using Firebase Auth) ---
+        let currentUsername = ''; 
+
+        // --- AUTHENTICATION LOGIC ---
 
         switchButton.addEventListener('click', () => {
             isRegisterMode = !isRegisterMode;
@@ -240,17 +245,35 @@
             authButton.textContent = isRegisterMode ? 'Register' : 'Log In';
             switchButton.textContent = isRegisterMode ? 'Already have an account? Log In' : 'Need an account? Register';
             authMessage.textContent = '';
+            
+            // Show/hide username input based on mode
+            usernameInput.style.display = isRegisterMode ? 'block' : 'none';
+            usernameInput.required = isRegisterMode;
         });
-
+        
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             authMessage.textContent = '';
             const email = emailInput.value.trim();
             const password = passwordInput.value;
+            const username = usernameInput.value.trim();
 
             if (isRegisterMode) {
+                if (!username) {
+                    authMessage.style.color = 'red';
+                    authMessage.textContent = 'Please choose a username.';
+                    return;
+                }
+                
                 try {
-                    await auth.createUserWithEmailAndPassword(email, password);
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    const user = userCredential.user;
+                    
+                    // Save the chosen username to Firestore
+                    await db.collection('usernames').doc(user.uid).set({
+                        username: username
+                    });
+
                     authMessage.style.color = 'green';
                     authMessage.textContent = 'Registration successful! Logging you in...';
                 } catch (error) {
@@ -276,8 +299,22 @@
                 console.error("Logout error:", error);
             }
         });
+
+        // Function to fetch the username from Firestore
+        async function fetchUsername(uid) {
+            try {
+                const doc = await db.collection('usernames').doc(uid).get();
+                if (doc.exists) {
+                    return doc.data().username;
+                }
+                return 'User'; 
+            } catch (error) {
+                console.error("Error fetching username:", error);
+                return 'User';
+            }
+        }
         
-        // --- TASK MANAGEMENT FUNCTIONS (using Firestore) ---
+        // --- TASK MANAGEMENT FUNCTIONS ---
 
         function renderTasks(tasks) {
             taskList.innerHTML = '';
@@ -334,7 +371,7 @@
             // Returns the unsubscribe function
             return tasksRef.onSnapshot(snapshot => {
                 const tasks = snapshot.docs.map(doc => ({
-                    id: doc.id, // Firestore document ID
+                    id: doc.id,
                     ...doc.data()
                 }));
                 renderTasks(tasks);
@@ -343,7 +380,7 @@
             });
         }
 
-        // Add a new task to Firestore
+        // Add task
         newTaskForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const text = newTaskText.value.trim();
@@ -354,7 +391,7 @@
                     userId: currentUser.uid, 
                     text: text,
                     completed: false,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp() // For ordering
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 newTaskText.value = '';
             } catch (error) {
@@ -374,7 +411,7 @@
             }
         }
 
-        // Delete a single task from Firestore
+        // Delete a single task
         async function deleteTask(taskId) {
             if (!currentUser) return;
             try {
@@ -384,7 +421,7 @@
             }
         }
 
-        // Clear all completed tasks (bulk delete)
+        // Clear all completed tasks
         clearBtn.addEventListener('click', async () => {
             if (!currentUser) return;
 
@@ -407,20 +444,20 @@
         // --- INITIALIZATION AND STATE MANAGEMENT ---
         let unsubscribeTaskListener;
 
-        auth.onAuthStateChanged(user => {
-            // Stop listening to tasks from the previous user/state
+        auth.onAuthStateChanged(async user => {
             if (unsubscribeTaskListener) {
                 unsubscribeTaskListener();
             }
 
             currentUser = user;
             if (currentUser) {
-                // User is signed in
-                welcomeMessage.textContent = `Welcome, ${currentUser.email}!`;
+                // User is signed in. Fetch and display the username.
+                currentUsername = await fetchUsername(currentUser.uid);
+                
+                welcomeMessage.textContent = `Welcome, ${currentUsername}!`; 
                 authSection.classList.add('hidden');
                 appSection.classList.remove('hidden');
                 
-                // Start listening for tasks from Firestore
                 unsubscribeTaskListener = listenForTasks();
                 
             } else {
@@ -430,6 +467,7 @@
                 taskList.innerHTML = '';
                 emailInput.value = '';
                 passwordInput.value = '';
+                usernameInput.value = ''; 
             }
         });
     });
