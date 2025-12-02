@@ -1,6 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VS Code Task Tracker (Firebase)</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,8 +33,6 @@
         .hidden {
             display: none !important;
         }
-
-        /* --- Auth Styling --- */
         #auth-form input, #auth-form button, #switch-button {
             width: 100%;
             padding: 10px;
@@ -38,7 +42,7 @@
             box-sizing: border-box;
         }
         #auth-button {
-            background-color: #007acc; /* VS Code blue */
+            background-color: #007acc; 
             color: white;
             border: none;
             cursor: pointer;
@@ -51,8 +55,6 @@
             color: red;
             text-align: center;
         }
-
-        /* --- App Styling --- */
         .header {
             display: flex;
             justify-content: space-between;
@@ -60,7 +62,7 @@
             margin-bottom: 15px;
         }
         #logout-button {
-            background: #ff1d04;
+            background: #e74c3c;
             color: white;
             border: none;
             padding: 5px 10px;
@@ -69,7 +71,7 @@
         }
         #task-stats {
             display: flex;
-            justify-content: space-between; /* Changed to space-between for better layout */
+            justify-content: space-between;
             align-items: center;
             padding: 10px;
             background: #f9f9f9;
@@ -81,8 +83,6 @@
             font-weight: bold;
             font-size: 0.9rem;
         }
-
-        /* New Styling for Clear Button */
         #clear-btn {
             background-color: #e74c3c;
             color: white;
@@ -95,7 +95,6 @@
         #clear-btn:hover {
             background-color: #c0392b;
         }
-
         #new-task-form {
             display: flex;
             margin-bottom: 20px;
@@ -108,13 +107,12 @@
         }
         #new-task-form button {
             padding: 10px 15px;
-            background-color: #2ecc50; /* Green */
+            background-color: #2ecc71;
             color: white;
             border: none;
             border-radius: 0 4px 4px 0;
             cursor: pointer;
         }
-
         #task-list {
             list-style: none;
             padding: 0;
@@ -131,11 +129,10 @@
             transition: background-color 0.3s;
         }
         #task-list li.completed {
-            background-color: #d4edda; /* Light green for completed */
+            background-color: #d4edda;
             text-decoration: line-through;
             color: #6c757d;
         }
-
         .complete-button {
             background: #007acc;
             color: white;
@@ -145,10 +142,8 @@
             cursor: pointer;
             white-space: nowrap;
         }
-        
-        /* New Styling for Delete Button */
         .delete-button {
-            background: #ff1900;
+            background: #e74c3c;
             color: white;
             border: none;
             padding: 5px 10px;
@@ -156,21 +151,21 @@
             cursor: pointer;
             white-space: nowrap;
             margin-left: 10px;
-            text-decoration: none !important; /* Prevent line-through on button text */
+            text-decoration: none !important;
         }
         .delete-button:hover {
             background-color: #c0392b;
         }
     </style>
 </head>
-
+<body>
     <div class="container">
         <h1>Task Tracker</h1>
         
         <div id="auth-section">
             <h2 id="auth-title">Login / Register</h2>
             <form id="auth-form">
-                <input type="text" id="username" placeholder="Username" required>
+                <input type="email" id="email" placeholder="Email" required> 
                 <input type="password" id="password" placeholder="Password" required>
                 <button type="submit" id="auth-button">Log In</button>
                 <button type="button" id="switch-button">Need an account? Register</button>
@@ -201,245 +196,243 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-    const authSection = document.getElementById('auth-section');
-    const appSection = document.getElementById('app-section');
-    const authForm = document.getElementById('auth-form');
-    const authTitle = document.getElementById('auth-title');
-    const authButton = document.getElementById('auth-button');
-    const switchButton = document.getElementById('switch-button');
-    const authMessage = document.getElementById('auth-message');
-    const logoutButton = document.getElementById('logout-button');
-    const newTaskForm = document.getElementById('new-task-form');
-    const newTaskText = document.getElementById('new-task-text');
-    const taskList = document.getElementById('task-list');
-    const welcomeMessage = document.getElementById('welcome-message');
-    const completedCount = document.getElementById('completed-count');
-    const remainingCount = document.getElementById('remaining-count');
-    const clearBtn = document.getElementById('clear-btn'); // New Button
+        // --- 2. FIREBASE CONFIGURATION (REPLACE THESE WITH YOUR DETAILS) ---
+        const firebaseConfig = {
+  apiKey: "AIzaSyD84yJk7wo4_7JvqAuMG8yst5RQnL-IwO0",
+  authDomain: "task-tracker-241ab.firebaseapp.com",
+  projectId: "task-tracker-241ab",
+  storageBucket: "task-tracker-241ab.firebasestorage.app",
+  messagingSenderId: "527187861224",
+  appId: "1:527187861224:web:ca72ebd72a5e63ff3eb35d"
+};
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = app.auth();
+        const db = app.firestore();
+        // ------------------------------------------------------------
 
-    let isRegisterMode = false;
-    let currentUser = null; 
+        const authSection = document.getElementById('auth-section');
+        const appSection = document.getElementById('app-section');
+        const authForm = document.getElementById('auth-form');
+        const authTitle = document.getElementById('auth-title');
+        const authButton = document.getElementById('auth-button');
+        const switchButton = document.getElementById('switch-button');
+        const authMessage = document.getElementById('auth-message');
+        const logoutButton = document.getElementById('logout-button');
+        const newTaskForm = document.getElementById('new-task-form');
+        const newTaskText = document.getElementById('new-task-text');
+        const taskList = document.getElementById('task-list');
+        const welcomeMessage = document.getElementById('welcome-message');
+        const completedCount = document.getElementById('completed-count');
+        const remainingCount = document.getElementById('remaining-count');
+        const clearBtn = document.getElementById('clear-btn');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
 
-    // --- UTILITY FUNCTIONS ---
-
-    const getStore = (key) => {
-        try {
-            return JSON.parse(localStorage.getItem(key)) || {};
-        } catch (e) {
-            console.error(`Error parsing localStorage key ${key}:`, e);
-            return {};
-        }
-    };
-
-    const setStore = (key, data) => {
-        localStorage.setItem(key, JSON.stringify(data));
-    };
-
-    const getTasks = (username) => {
-        const allTasks = getStore('tasks');
-        return allTasks[username] || [];
-    };
-
-    const saveTasks = (username, tasks) => {
-        const allTasks = getStore('tasks');
-        allTasks[username] = tasks;
-        setStore('tasks', allTasks);
-    };
-
-    // --- AUTHENTICATION LOGIC ---
-
-    switchButton.addEventListener('click', () => {
-        isRegisterMode = !isRegisterMode;
-        authTitle.textContent = isRegisterMode ? 'Register Account' : 'Login';
-        authButton.textContent = isRegisterMode ? 'Register' : 'Log In';
-        switchButton.textContent = isRegisterMode ? 'Already have an account? Log In' : 'Need an account? Register';
-        authMessage.textContent = '';
-    });
-
-    authForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        authMessage.textContent = '';
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
-
-        if (!username || !password) {
-            authMessage.style.color = 'red';
-            authMessage.textContent = 'Username and password are required.';
-            return;
-        }
-
-        const users = getStore('users');
-
-        if (isRegisterMode) {
-            if (users[username]) {
-                authMessage.style.color = 'red';
-                authMessage.textContent = 'User already exists.';
-            } else {
-                users[username] = { password }; 
-                setStore('users', users);
-                
-                authMessage.style.color = 'green';
-                authMessage.textContent = 'Registration successful. Please log in.';
-                switchButton.click(); 
-            }
-        } else {
-            if (users[username] && users[username].password === password) {
-                currentUser = username;
-                localStorage.setItem('currentUser', username);
-                
-                authMessage.style.color = 'green';
-                authMessage.textContent = 'Login successful!';
-                checkLoginStatus(); 
-            } else {
-                authMessage.style.color = 'red';
-                authMessage.textContent = 'Invalid username or password.';
-            }
-        }
-    });
-
-    logoutButton.addEventListener('click', () => {
-        localStorage.removeItem('currentUser');
-        currentUser = null;
-        authSection.classList.remove('hidden');
-        appSection.classList.add('hidden');
-        taskList.innerHTML = '';
-        document.getElementById('username').value = '';
-        document.getElementById('password').value = '';
-    });
-    
-    // --- TASK MANAGEMENT FUNCTIONS ---
-
-    function renderTasks(tasks) {
-        taskList.innerHTML = '';
+        let isRegisterMode = false;
+        let currentUser = null; 
         
-        let completed = 0;
-        let remaining = 0;
-        
-        tasks.forEach(task => {
-            const li = document.createElement('li');
-            li.dataset.taskId = task.id;
-            
-            const taskTextSpan = document.createElement('span');
-            taskTextSpan.textContent = task.text;
-            li.appendChild(taskTextSpan);
+        // --- AUTHENTICATION LOGIC (using Firebase Auth) ---
 
-            if (task.completed) {
-                li.classList.add('completed');
-                completed++;
-
-                // NEW: Add Delete button for completed tasks
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Delete';
-                deleteButton.classList.add('delete-button');
-                deleteButton.addEventListener('click', () => deleteTask(task.id));
-                li.appendChild(deleteButton);
-
-            } else {
-                remaining++;
-                const completeButton = document.createElement('button');
-                completeButton.textContent = 'Complete';
-                completeButton.classList.add('complete-button');
-                completeButton.addEventListener('click', () => completeTask(task.id));
-                li.appendChild(completeButton);
-            }
-            
-            taskList.appendChild(li);
+        switchButton.addEventListener('click', () => {
+            isRegisterMode = !isRegisterMode;
+            authTitle.textContent = isRegisterMode ? 'Register Account' : 'Login';
+            authButton.textContent = isRegisterMode ? 'Register' : 'Log In';
+            switchButton.textContent = isRegisterMode ? 'Already have an account? Log In' : 'Need an account? Register';
+            authMessage.textContent = '';
         });
 
-        // Update counts
-        completedCount.textContent = completed;
-        remainingCount.textContent = remaining;
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            authMessage.textContent = '';
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
 
-        // NEW: Show/Hide Clear Button
-        if (completed > 0) {
-            clearBtn.style.display = 'block';
-        } else {
-            clearBtn.style.display = 'none';
+            if (isRegisterMode) {
+                try {
+                    await auth.createUserWithEmailAndPassword(email, password);
+                    authMessage.style.color = 'green';
+                    authMessage.textContent = 'Registration successful! Logging you in...';
+                } catch (error) {
+                    authMessage.style.color = 'red';
+                    authMessage.textContent = `Registration failed: ${error.message}`;
+                }
+            } else {
+                try {
+                    await auth.signInWithEmailAndPassword(email, password);
+                    authMessage.style.color = 'green';
+                    authMessage.textContent = 'Login successful!';
+                } catch (error) {
+                    authMessage.style.color = 'red';
+                    authMessage.textContent = `Login failed: ${error.message}`;
+                }
+            }
+        });
+
+        logoutButton.addEventListener('click', async () => {
+            try {
+                await auth.signOut();
+            } catch (error) {
+                console.error("Logout error:", error);
+            }
+        });
+        
+        // --- TASK MANAGEMENT FUNCTIONS (using Firestore) ---
+
+        function renderTasks(tasks) {
+            taskList.innerHTML = '';
+            
+            let completed = 0;
+            let remaining = 0;
+            
+            tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.dataset.taskId = task.id; 
+                
+                const taskTextSpan = document.createElement('span');
+                taskTextSpan.textContent = task.text;
+                li.appendChild(taskTextSpan);
+
+                if (task.completed) {
+                    li.classList.add('completed');
+                    completed++;
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.classList.add('delete-button');
+                    deleteButton.addEventListener('click', () => deleteTask(task.id));
+                    li.appendChild(deleteButton);
+
+                } else {
+                    remaining++;
+                    const completeButton = document.createElement('button');
+                    completeButton.textContent = 'Complete';
+                    completeButton.classList.add('complete-button');
+                    completeButton.addEventListener('click', () => completeTask(task.id));
+                    li.appendChild(completeButton);
+                }
+                
+                taskList.appendChild(li);
+            });
+
+            completedCount.textContent = completed;
+            remainingCount.textContent = remaining;
+
+            if (completed > 0) {
+                clearBtn.style.display = 'block';
+            } else {
+                clearBtn.style.display = 'none';
+            }
         }
-    }
 
-    function loadTasks() {
-        if (!currentUser) return;
-        const tasks = getTasks(currentUser);
-        renderTasks(tasks);
-    }
+        // Loads tasks from Firestore using a real-time listener
+        function listenForTasks() {
+            if (!currentUser) return;
 
-    newTaskForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const text = newTaskText.value.trim();
-        if (!text || !currentUser) return;
+            const tasksRef = db.collection('tasks').where('userId', '==', currentUser.uid).orderBy('timestamp', 'asc');
 
-        const tasks = getTasks(currentUser);
-        
-        const maxId = tasks.reduce((max, task) => (task.id > max ? task.id : max), 0);
-        
-        const newTask = {
-            id: maxId + 1,
-            text: text,
-            completed: false
-        };
+            // Returns the unsubscribe function
+            return tasksRef.onSnapshot(snapshot => {
+                const tasks = snapshot.docs.map(doc => ({
+                    id: doc.id, // Firestore document ID
+                    ...doc.data()
+                }));
+                renderTasks(tasks);
+            }, error => {
+                console.error("Error fetching tasks:", error);
+            });
+        }
 
-        tasks.push(newTask);
-        saveTasks(currentUser, tasks);
-        
-        newTaskText.value = ''; 
-        loadTasks(); 
+        // Add a new task to Firestore
+        newTaskForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = newTaskText.value.trim();
+            if (!text || !currentUser) return;
+
+            try {
+                await db.collection('tasks').add({
+                    userId: currentUser.uid, 
+                    text: text,
+                    completed: false,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp() // For ordering
+                });
+                newTaskText.value = '';
+            } catch (error) {
+                console.error("Error adding task:", error);
+            }
+        });
+
+        // Update task completion status
+        async function completeTask(taskId) {
+            if (!currentUser) return;
+            try {
+                await db.collection('tasks').doc(taskId).update({
+                    completed: true
+                });
+            } catch (error) {
+                console.error("Error completing task:", error);
+            }
+        }
+
+        // Delete a single task from Firestore
+        async function deleteTask(taskId) {
+            if (!currentUser) return;
+            try {
+                await db.collection('tasks').doc(taskId).delete();
+            } catch (error) {
+                console.error("Error deleting task:", error);
+            }
+        }
+
+        // Clear all completed tasks (bulk delete)
+        clearBtn.addEventListener('click', async () => {
+            if (!currentUser) return;
+
+            const completedTasksRef = db.collection('tasks')
+                .where('userId', '==', currentUser.uid)
+                .where('completed', '==', true);
+            
+            try {
+                const batch = db.batch();
+                const snapshot = await completedTasksRef.get();
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+            } catch (error) {
+                console.error("Error clearing completed tasks:", error);
+            }
+        });
+
+        // --- INITIALIZATION AND STATE MANAGEMENT ---
+        let unsubscribeTaskListener;
+
+        auth.onAuthStateChanged(user => {
+            // Stop listening to tasks from the previous user/state
+            if (unsubscribeTaskListener) {
+                unsubscribeTaskListener();
+            }
+
+            currentUser = user;
+            if (currentUser) {
+                // User is signed in
+                welcomeMessage.textContent = `Welcome, ${currentUser.email}!`;
+                authSection.classList.add('hidden');
+                appSection.classList.remove('hidden');
+                
+                // Start listening for tasks from Firestore
+                unsubscribeTaskListener = listenForTasks();
+                
+            } else {
+                // User is signed out
+                authSection.classList.remove('hidden');
+                appSection.classList.add('hidden');
+                taskList.innerHTML = '';
+                emailInput.value = '';
+                passwordInput.value = '';
+            }
+        });
     });
-
-    function completeTask(taskId) {
-        if (!currentUser) return;
-        
-        const tasks = getTasks(currentUser);
-        const task = tasks.find(t => t.id === taskId);
-
-        if (task) {
-            task.completed = true;
-            saveTasks(currentUser, tasks);
-            loadTasks(); 
-        }
-    }
-
-    // NEW: Delete a single task
-    function deleteTask(taskId) {
-        if (!currentUser) return;
-
-        let tasks = getTasks(currentUser);
-        tasks = tasks.filter(t => t.id !== taskId);
-        
-        saveTasks(currentUser, tasks);
-        loadTasks();
-    }
-
-    // NEW: Clear all completed tasks
-    clearBtn.addEventListener('click', () => {
-        if (!currentUser) return;
-
-        let tasks = getTasks(currentUser);
-        tasks = tasks.filter(t => !t.completed); // Keep only active tasks
-
-        saveTasks(currentUser, tasks);
-        loadTasks();
-    });
-    
-   
-    function checkLoginStatus() {
-        currentUser = localStorage.getItem('currentUser');
-        
-        
-        if (currentUser) {
-            welcomeMessage.textContent = `Welcome, ${currentUser}!`;
-            authSection.classList.add('hidden');
-            appSection.classList.remove('hidden');
-            loadTasks();
-        } 
-        else {
-            authSection.classList.remove('hidden');
-            appSection.classList.add('hidden');
-        }
-
-        
-    }
-
-    checkLoginStatus();
-});
 </script>
+</body>
+</html>
