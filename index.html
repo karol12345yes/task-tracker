@@ -442,13 +442,16 @@
 
             try {
                 // Add the task to Firestore with the current user's ID and a timestamp
-                await db.collection('tasks').add({
+                for (let i = 0; i < 1; i++) {
+                    await db.collection('tasks').add({
                     userId: currentUser.uid, 
                     text: text,
                     completed: false,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
+                }
                 newTaskText.value = ''; 
+                
             } catch (error) {
                 console.error("Error adding task:", error);
             }
