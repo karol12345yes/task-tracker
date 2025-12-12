@@ -39,10 +39,10 @@
             box-sizing: border-box;
         }
         #auth-button { background-color: #007acc; color: white; border: none; cursor: pointer; }
-        #switch-button { background-color: #eee; cursor: pointer; }
-        #auth-message { color: red; text-align: center; }
+        #switch-button { background-color: #eee; cursor: pointer; border: none; }
+        #auth-message { color: red; text-align: center; font-size: 0.9rem; }
 
-        /* --- UPDATED: Professional Settings Menu --- */
+        /* --- Settings Menu (Blue Button) --- */
         .header {
             display: flex;
             justify-content: space-between;
@@ -50,26 +50,22 @@
             margin-bottom: 15px;
             position: relative;
         }
-        
         .menu-container { position: relative; }
         
         #menu-toggle-btn {
-     background: #007acc; /* VS Code blue */
-     color: white;        /* White text for contrast */
-     border: none;        /* Remove the grey border */
-     padding: 8px 15px;
-     border-radius: 4px;
-     cursor: pointer;
-     font-size: 0.9rem;
-     display: flex;
-    align-items: center;
-    gap: 5px;
-      transition: background 0.2s; /* Smooth hover effect */
-}
-
-#menu-toggle-btn:hover {
-    background: #005a9e; /* Slightly darker blue on hover */
-}
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.2s;
+        }
+        #menu-toggle-btn:hover { background: #005a9e; }
 
         .dropdown-menu {
             position: absolute;
@@ -79,14 +75,13 @@
             border: 1px solid #ddd;
             border-radius: 6px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            width: 220px; /* Larger, professional width */
+            width: 220px;
             z-index: 1000;
             display: none;
             flex-direction: column;
             overflow: hidden;
         }
         .dropdown-menu.show { display: flex; }
-
         .dropdown-menu button {
             width: 100%;
             padding: 12px 15px;
@@ -101,7 +96,7 @@
         .dropdown-menu button:hover { background: #f0f7ff; color: #007acc; }
         .dropdown-menu button:last-child { border-bottom: none; color: #ff1d04; }
 
-        /* --- UPDATED: Modal Styling --- */
+        /* --- Modal Styling --- */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -127,31 +122,46 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
-        .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 20px;
-            gap: 10px;
-        }
+        .modal-actions { display: flex; justify-content: flex-end; margin-top: 20px; gap: 10px; }
         .btn-save { background: #007acc; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
         .btn-cancel { background: #eee; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+        .btn-danger { background: #ff1d04; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
 
-        /* --- Rest of App Styling (Unchanged) --- */
-        #task-stats {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px; background: #f9f9f9; border-radius: 4px; margin-bottom: 15px;
+        /* --- Task Stats & Action Buttons --- */
+        #task-stats { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 10px; 
+            background: #f9f9f9; 
+            border-radius: 4px; 
+            margin-bottom: 15px; 
         }
         #task-stats p { margin: 0; font-weight: bold; font-size: 0.9rem; }
-        #clear-btn { background-color: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-right: 5px; }
-        #complete-all-btn { background-color: #f39c12; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+        
+        /* Updated: Space between the clear/complete buttons */
+        #clear-btn, #complete-all-btn { 
+            color: white; 
+            border: none; 
+            padding: 5px 12px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.8rem; 
+        }
+        #clear-btn { 
+            background-color: #e74c3c; 
+            margin-right: 12px; /* Increased spacing */
+        }
+        #complete-all-btn { 
+            background-color: #f39c12; 
+        }
+
+        /* --- Task List Styling --- */
         #new-task-form { display: flex; margin-bottom: 20px; }
         #new-task-text { flex-grow: 1; padding: 10px; border-radius: 4px 0 0 4px; border: 1px solid #ddd; }
         #new-task-form button { padding: 10px 15px; background-color: #2ecc50; color: white; border: none; border-radius: 0 4px 4px 0; cursor: pointer; }
         #task-list { list-style: none; padding: 0; }
-        #task-list li {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px; margin-bottom: 8px; background: #fff; border: 1px solid #eee; border-radius: 4px;
-        }
+        #task-list li { display: flex; justify-content: space-between; align-items: center; padding: 10px; margin-bottom: 8px; background: #fff; border: 1px solid #eee; border-radius: 4px; }
         #task-list li.completed { background-color: #d4edda; text-decoration: line-through; color: #6c757d; }
         .complete-button { background: #007acc; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
         .delete-button { background: #ff1900; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-left: 10px; }
@@ -162,7 +172,7 @@
         <h1>Task Tracker</h1>
         
         <div id="auth-section">
-            <h2 id="auth-title">Login / Register</h2>
+            <h2 id="auth-title">Login</h2>
             <form id="auth-form">
                 <input type="text" id="username-input" placeholder="Username" required>
                 <input type="password" id="password-input" placeholder="Password" required>
@@ -180,7 +190,7 @@
                     <div id="account-menu" class="dropdown-menu">
                         <button id="open-pass-modal">Change Password</button>
                         <button id="logout-button">Sign Out</button>
-                        <button id="delete-acc-btn">Delete Account</button>
+                        <button id="open-delete-modal">Delete Account</button>
                     </div>
                 </div>
             </div>
@@ -188,7 +198,7 @@
             <div id="task-stats">
                 <p>Done: <span id="completed-count">0</span></p>
                 <p>Left: <span id="remaining-count">0</span></p>
-                <div>
+                <div style="display: flex;">
                     <button id="clear-btn" style="display:none;">Clear Completed</button>
                     <button id="complete-all-btn" style="display:none;">Complete All</button>
                 </div>
@@ -198,7 +208,6 @@
                 <input type="text" id="new-task-text" placeholder="Enter a new task..." required>
                 <button type="submit">Add Task</button>
             </form>
-
             <ul id="task-list"></ul>
         </div>
     </div>
@@ -210,9 +219,22 @@
             <input type="password" id="modal-new-pass" placeholder="New Password">
             <input type="password" id="modal-confirm-pass" placeholder="Confirm New Password">
             <p id="modal-error" style="color:red; font-size: 0.8rem; margin-top: 10px;"></p>
+            <p id="modal-success" style="color:green; font-size: 0.8rem; margin-top: 10px;"></p>
             <div class="modal-actions">
                 <button class="btn-cancel" id="close-pass-modal">Cancel</button>
                 <button class="btn-save" id="save-new-pass">Update</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 style="color: #ff1d04;">Delete Account?</h3>
+            <p style="font-size: 0.9rem; color: #666;">This action is permanent and will delete all your tasks.</p>
+            <p id="delete-modal-error" style="color:red; font-size: 0.8rem;"></p>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="close-delete-modal">Cancel</button>
+                <button class="btn-danger" id="confirm-delete-btn">Permanently Delete</button>
             </div>
         </div>
     </div>
@@ -232,183 +254,139 @@
         const db = app.firestore();
         const DUMMY_DOMAIN = '@tasktracker.app'; 
 
-        const authSection = document.getElementById('auth-section');
-        const appSection = document.getElementById('app-section');
-        const authForm = document.getElementById('auth-form');
-        const authTitle = document.getElementById('auth-title');
-        const authButton = document.getElementById('auth-button');
-        const switchButton = document.getElementById('switch-button');
-        const authMessage = document.getElementById('auth-message');
-        const logoutButton = document.getElementById('logout-button');
-        const newTaskForm = document.getElementById('new-task-form');
-        const newTaskText = document.getElementById('new-task-text');
-        const taskList = document.getElementById('task-list');
-        const welcomeMessage = document.getElementById('welcome-message');
-        const completedCount = document.getElementById('completed-count');
-        const remainingCount = document.getElementById('remaining-count');
-        const clearBtn = document.getElementById('clear-btn'); 
-        const completeAllBtn = document.getElementById('complete-all-btn'); 
-        const usernameInput = document.getElementById('username-input');
-        const passwordInput = document.getElementById('password-input');
-
-        // NEW UI Elements
-        const menuToggleBtn = document.getElementById('menu-toggle-btn');
-        const accountMenu = document.getElementById('account-menu');
-        const passwordModal = document.getElementById('password-modal');
-        const openPassModalBtn = document.getElementById('open-pass-modal');
-        const closePassModalBtn = document.getElementById('close-pass-modal');
-        const savePassBtn = document.getElementById('save-new-pass');
-        const deleteAccBtn = document.getElementById('delete-acc-btn');
+        const authSection = document.getElementById('auth-section'),
+              appSection = document.getElementById('app-section'),
+              authForm = document.getElementById('auth-form'),
+              authTitle = document.getElementById('auth-title'),
+              authButton = document.getElementById('auth-button'),
+              switchButton = document.getElementById('switch-button'),
+              authMessage = document.getElementById('auth-message'),
+              logoutButton = document.getElementById('logout-button'),
+              newTaskForm = document.getElementById('new-task-form'),
+              newTaskText = document.getElementById('new-task-text'),
+              taskList = document.getElementById('task-list'),
+              welcomeMessage = document.getElementById('welcome-message'),
+              completedCount = document.getElementById('completed-count'),
+              remainingCount = document.getElementById('remaining-count'),
+              clearBtn = document.getElementById('clear-btn'), 
+              completeAllBtn = document.getElementById('complete-all-btn'),
+              menuToggleBtn = document.getElementById('menu-toggle-btn'),
+              accountMenu = document.getElementById('account-menu'),
+              passwordModal = document.getElementById('password-modal'),
+              deleteModal = document.getElementById('delete-modal');
 
         let isRegisterMode = false;
-        let currentUser = null; 
 
-        // --- UPDATED: Menu & Modal UI Logic ---
-        menuToggleBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            accountMenu.classList.toggle('show');
-        });
-
+        // --- Menu Logic ---
+        menuToggleBtn.addEventListener('click', (e) => { e.stopPropagation(); accountMenu.classList.toggle('show'); });
         document.addEventListener('click', () => accountMenu.classList.remove('show'));
 
-        openPassModalBtn.addEventListener('click', () => {
+        // --- Password Logic ---
+        document.getElementById('open-pass-modal').addEventListener('click', () => {
             passwordModal.classList.remove('hidden');
-            accountMenu.classList.remove('show');
-        });
-
-        closePassModalBtn.addEventListener('click', () => {
-            passwordModal.classList.add('hidden');
             document.getElementById('modal-error').textContent = '';
+            document.getElementById('modal-success').textContent = '';
         });
+        document.getElementById('close-pass-modal').addEventListener('click', () => passwordModal.classList.add('hidden'));
 
-        savePassBtn.addEventListener('click', async () => {
-            const oldPass = document.getElementById('modal-old-pass').value;
-            const newPass = document.getElementById('modal-new-pass').value;
-            const confirmPass = document.getElementById('modal-confirm-pass').value;
-            const errorEl = document.getElementById('modal-error');
+        document.getElementById('save-new-pass').addEventListener('click', async () => {
+            const oldPassInput = document.getElementById('modal-old-pass');
+            const newPassInput = document.getElementById('modal-new-pass');
+            const confirmPassInput = document.getElementById('modal-confirm-pass');
+            const err = document.getElementById('modal-error');
+            const success = document.getElementById('modal-success');
 
-            if (newPass !== confirmPass) { errorEl.textContent = "New passwords do not match."; return; }
-            if (newPass.length < 6) { errorEl.textContent = "Password must be at least 6 characters."; return; }
+            if (newPassInput.value !== confirmPassInput.value) { err.textContent = "New passwords don't match."; return; }
 
             try {
-                // Re-authenticate user before sensitive action
-                const credential = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, oldPass);
-                await auth.currentUser.reauthenticateWithCredential(credential);
-                await auth.currentUser.updatePassword(newPass);
-                alert("Password updated!");
-                passwordModal.classList.add('hidden');
-            } catch (e) {
-                errorEl.textContent = e.message;
-            }
+                const cred = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, oldPassInput.value);
+                await auth.currentUser.reauthenticateWithCredential(cred);
+                await auth.currentUser.updatePassword(newPassInput.value);
+                
+                oldPassInput.value = ""; newPassInput.value = ""; confirmPassInput.value = "";
+                err.textContent = "";
+                success.textContent = "Success! Password updated.";
+                setTimeout(() => { passwordModal.classList.add('hidden'); }, 2000);
+            } catch (e) { err.textContent = e.message; }
         });
 
-        // --- AUTH & USER LOGIC (Unchanged) ---
-        async function fetchUsername(uid) {
+        // --- Delete Account Logic ---
+        document.getElementById('open-delete-modal').addEventListener('click', () => {
+            deleteModal.classList.remove('hidden');
+            document.getElementById('delete-modal-error').textContent = '';
+        });
+        document.getElementById('close-delete-modal').addEventListener('click', () => deleteModal.classList.add('hidden'));
+        document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
             try {
-                const doc = await db.collection('usernames').doc(uid).get();
-                return doc.exists ? doc.data().username : 'User'; 
-            } catch (e) { return 'User'; }
-        }
+                await db.collection('usernames').doc(auth.currentUser.uid).delete();
+                await auth.currentUser.delete();
+            } catch (e) { document.getElementById('delete-modal-error').textContent = "Security limit: Log out and in again to delete."; }
+        });
 
+        // --- Auth Core Logic ---
         switchButton.addEventListener('click', () => {
             isRegisterMode = !isRegisterMode;
-            authTitle.textContent = isRegisterMode ? 'Register Account' : 'Login';
+            authTitle.textContent = isRegisterMode ? 'Register' : 'Login';
             authButton.textContent = isRegisterMode ? 'Register' : 'Log In';
-            switchButton.textContent = isRegisterMode ? 'Already have an account? Log In' : 'Need an account? Register';
         });
 
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value;
-            const hiddenEmail = username + DUMMY_DOMAIN;
-
+            const user = document.getElementById('username-input').value.trim();
+            const email = user + DUMMY_DOMAIN;
             try {
                 if (isRegisterMode) {
-                    const userCred = await auth.createUserWithEmailAndPassword(hiddenEmail, password);
-                    await db.collection('usernames').doc(userCred.user.uid).set({ username });
-                } else {
-                    await auth.signInWithEmailAndPassword(hiddenEmail, password);
-                }
-            } catch (error) { authMessage.textContent = error.message; }
+                    const res = await auth.createUserWithEmailAndPassword(email, document.getElementById('password-input').value);
+                    await db.collection('usernames').doc(res.user.uid).set({ username: user });
+                } else { await auth.signInWithEmailAndPassword(email, document.getElementById('password-input').value); }
+            } catch (e) { authMessage.textContent = e.message; }
         });
 
         logoutButton.addEventListener('click', () => auth.signOut());
 
-        deleteAccBtn.addEventListener('click', async () => {
-            if (confirm("Permanently delete account and all tasks?")) {
-                try {
-                    await db.collection('usernames').doc(auth.currentUser.uid).delete();
-                    await auth.currentUser.delete();
-                } catch (e) { alert("Error: " + e.message + ". Try logging out and back in first."); }
-            }
-        });
-
-        // --- TASK MANAGEMENT (Unchanged) ---
+        // --- Task Management ---
         function renderTasks(tasks) {
             taskList.innerHTML = '';
-            let comp = 0, rem = 0;
-            tasks.forEach(task => {
+            let c = 0, r = 0;
+            tasks.forEach(t => {
                 const li = document.createElement('li');
-                if (task.completed) {
-                    li.classList.add('completed'); comp++;
-                    li.innerHTML = `<span>${task.text}</span><button class="delete-button" onclick="deleteTask('${task.id}')">Delete</button>`;
-                } else {
-                    rem++;
-                    li.innerHTML = `<span>${task.text}</span><button class="complete-button" onclick="completeTask('${task.id}')">Complete</button>`;
-                }
+                if (t.completed) { li.classList.add('completed'); c++; li.innerHTML = `<span>${t.text}</span><button class="delete-button" onclick="deleteTask('${t.id}')">Delete</button>`; }
+                else { r++; li.innerHTML = `<span>${t.text}</span><button class="complete-button" onclick="completeTask('${t.id}')">Complete</button>`; }
                 taskList.appendChild(li);
             });
-            completedCount.textContent = comp;
-            remainingCount.textContent = rem;
-            clearBtn.style.display = comp > 0 ? 'block' : 'none';
-            completeAllBtn.style.display = rem > 0 ? 'block' : 'none';
+            completedCount.textContent = c; remainingCount.textContent = r;
+            clearBtn.style.display = c > 0 ? 'inline-block' : 'none'; completeAllBtn.style.display = r > 0 ? 'inline-block' : 'none';
         }
-
         window.completeTask = (id) => db.collection('tasks').doc(id).update({ completed: true });
         window.deleteTask = (id) => db.collection('tasks').doc(id).delete();
-
+        
         clearBtn.addEventListener('click', async () => {
             const snap = await db.collection('tasks').where('userId', '==', auth.currentUser.uid).where('completed', '==', true).get();
-            const batch = db.batch();
-            snap.docs.forEach(doc => batch.delete(doc.ref));
-            await batch.commit();
+            const batch = db.batch(); snap.docs.forEach(doc => batch.delete(doc.ref)); await batch.commit();
         });
-
+        
         completeAllBtn.addEventListener('click', async () => {
             const snap = await db.collection('tasks').where('userId', '==', auth.currentUser.uid).where('completed', '==', false).get();
-            const batch = db.batch();
-            snap.docs.forEach(doc => batch.update(doc.ref, { completed: true }));
-            await batch.commit();
+            const batch = db.batch(); snap.docs.forEach(doc => batch.update(doc.ref, { completed: true })); await batch.commit();
         });
 
         newTaskForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const text = newTaskText.value.trim();
-            if (text && auth.currentUser) {
-                await db.collection('tasks').add({
-                    userId: auth.currentUser.uid, text, completed: false, timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
+            if (newTaskText.value.trim()) {
+                await db.collection('tasks').add({ userId: auth.currentUser.uid, text: newTaskText.value, completed: false, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                 newTaskText.value = '';
             }
         });
 
-        // --- INITIALIZATION ---
-        let unsubscribe;
-        auth.onAuthStateChanged(async user => {
-            if (unsubscribe) unsubscribe();
-            currentUser = user;
-            if (user) {
-                welcomeMessage.textContent = `Welcome, ${await fetchUsername(user.uid)}!`;
-                authSection.classList.add('hidden');
-                appSection.classList.remove('hidden');
-                unsubscribe = db.collection('tasks').where('userId', '==', user.uid).orderBy('timestamp', 'asc')
-                    .onSnapshot(snap => renderTasks(snap.docs.map(d => ({id: d.id, ...d.data()}))));
-            } else {
-                authSection.classList.remove('hidden');
-                appSection.classList.add('hidden');
-                taskList.innerHTML = '';
-            }
+        let unsub;
+        auth.onAuthStateChanged(async u => {
+            if (unsub) unsub();
+            if (u) {
+                const doc = await db.collection('usernames').doc(u.uid).get();
+                welcomeMessage.textContent = `Hi, ${doc.exists ? doc.data().username : 'User'}`;
+                authSection.classList.add('hidden'); appSection.classList.remove('hidden');
+                unsub = db.collection('tasks').where('userId', '==', u.uid).orderBy('timestamp', 'asc').onSnapshot(s => renderTasks(s.docs.map(d => ({id: d.id, ...d.data()}))));
+            } else { authSection.classList.remove('hidden'); appSection.classList.add('hidden'); }
         });
     });
 </script>
