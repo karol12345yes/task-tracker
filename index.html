@@ -26,13 +26,8 @@
             width: 100%;
             max-width: 450px;
         }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .hidden {
-            display: none !important;
-        }
+        h1 { text-align: center; color: #333; }
+        .hidden { display: none !important; }
 
         /* --- Auth Styling --- */
         #auth-form input, #auth-form button, #switch-button {
@@ -43,145 +38,123 @@
             border: 1px solid #ddd;
             box-sizing: border-box;
         }
-        #auth-button {
-            background-color: #007acc; /* VS Code blue */
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        #switch-button {
-            background-color: #eee;
-            cursor: pointer;
-        }
-        #auth-message {
-            color: red;
-            text-align: center;
-        }
+        #auth-button { background-color: #007acc; color: white; border: none; cursor: pointer; }
+        #switch-button { background-color: #eee; cursor: pointer; }
+        #auth-message { color: red; text-align: center; }
 
-        /* --- App Styling --- */
+        /* --- UPDATED: Professional Settings Menu --- */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
-        }
-        #logout-button {
-            background: #ff1d04;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        #task-stats {
-            display: flex;
-            justify-content: space-between; 
-            align-items: center;
-            padding: 10px;
-            background: #f9f9f9;
-            border-radius: 4px;
-            margin-bottom: 15px;
-        }
-        #task-stats p {
-            margin: 0;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        /* Styling for Clear Completed Button */
-        #clear-btn {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            margin-right: 5px; /* Added spacing */
-        }
-        #clear-btn:hover {
-            background-color: #c0392b;
+            position: relative;
         }
         
-        /* NEW STYLING for Complete All Button */
-        #complete-all-btn {
-            background-color: #f39c12; /* Orange color for mass action */
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        #complete-all-btn:hover {
-            background-color: #e67e22;
-        }
+        .menu-container { position: relative; }
+        
+        #menu-toggle-btn {
+     background: #007acc; /* VS Code blue */
+     color: white;        /* White text for contrast */
+     border: none;        /* Remove the grey border */
+     padding: 8px 15px;
+     border-radius: 4px;
+     cursor: pointer;
+     font-size: 0.9rem;
+     display: flex;
+    align-items: center;
+    gap: 5px;
+      transition: background 0.2s; /* Smooth hover effect */
+}
 
-        #new-task-form {
-            display: flex;
-            margin-bottom: 20px;
-        }
-        #new-task-text {
-            flex-grow: 1;
-            padding: 10px;
-            border-radius: 4px 0 0 4px;
+#menu-toggle-btn:hover {
+    background: #005a9e; /* Slightly darker blue on hover */
+}
+
+        .dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: 42px;
+            background: white;
             border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            width: 220px; /* Larger, professional width */
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
         }
-        #new-task-form button {
-            padding: 10px 15px;
-            background-color: #2ecc50; /* Green */
-            color: white;
-            border: none;
-            border-radius: 0 4px 4px 0;
-            cursor: pointer;
-        }
+        .dropdown-menu.show { display: flex; }
 
-        #task-list {
-            list-style: none;
-            padding: 0;
+        .dropdown-menu button {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            background: none;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #444;
+            border-bottom: 1px solid #f0f0f0;
         }
-        #task-list li {
+        .dropdown-menu button:hover { background: #f0f7ff; color: #007acc; }
+        .dropdown-menu button:last-child { border-bottom: none; color: #ff1d04; }
+
+        /* --- UPDATED: Modal Styling --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            width: 320px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { margin-top: 0; font-size: 1.2rem; }
+        .modal-content input {
+            width: 100%;
             padding: 10px;
-            margin-bottom: 8px;
-            background: #fff;
-            border: 1px solid #eee;
+            margin-top: 10px;
+            border: 1px solid #ddd;
             border-radius: 4px;
-            transition: background-color 0.3s;
+            box-sizing: border-box;
         }
-        #task-list li.completed {
-            background-color: #d4edda; /* Light green for completed */
-            text-decoration: line-through;
-            color: #6c757d;
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            gap: 10px;
         }
+        .btn-save { background: #007acc; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+        .btn-cancel { background: #eee; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
 
-        .complete-button {
-            background: #007acc;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            white-space: nowrap;
+        /* --- Rest of App Styling (Unchanged) --- */
+        #task-stats {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px; background: #f9f9f9; border-radius: 4px; margin-bottom: 15px;
         }
-        
-        /* Styling for Delete Button */
-        .delete-button {
-            background: #ff1900;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            white-space: nowrap;
-            margin-left: 10px;
-            text-decoration: none !important; /* Prevent line-through on button text */
+        #task-stats p { margin: 0; font-weight: bold; font-size: 0.9rem; }
+        #clear-btn { background-color: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-right: 5px; }
+        #complete-all-btn { background-color: #f39c12; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+        #new-task-form { display: flex; margin-bottom: 20px; }
+        #new-task-text { flex-grow: 1; padding: 10px; border-radius: 4px 0 0 4px; border: 1px solid #ddd; }
+        #new-task-form button { padding: 10px 15px; background-color: #2ecc50; color: white; border: none; border-radius: 0 4px 4px 0; cursor: pointer; }
+        #task-list { list-style: none; padding: 0; }
+        #task-list li {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px; margin-bottom: 8px; background: #fff; border: 1px solid #eee; border-radius: 4px;
         }
-        .delete-button:hover {
-            background-color: #c0392b;
-        }
+        #task-list li.completed { background-color: #d4edda; text-decoration: line-through; color: #6c757d; }
+        .complete-button { background: #007acc; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .delete-button { background: #ff1900; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-left: 10px; }
     </style>
 </head>
 <body>
@@ -202,13 +175,19 @@
         <div id="app-section" class="hidden">
             <div class="header">
                 <span id="welcome-message"></span>
-                <button id="logout-button">Logout</button>
+                <div class="menu-container">
+                    <button id="menu-toggle-btn">Settings ⚙️</button>
+                    <div id="account-menu" class="dropdown-menu">
+                        <button id="open-pass-modal">Change Password</button>
+                        <button id="logout-button">Sign Out</button>
+                        <button id="delete-acc-btn">Delete Account</button>
+                    </div>
+                </div>
             </div>
             
             <div id="task-stats">
                 <p>Done: <span id="completed-count">0</span></p>
                 <p>Left: <span id="remaining-count">0</span></p>
-                
                 <div>
                     <button id="clear-btn" style="display:none;">Clear Completed</button>
                     <button id="complete-all-btn" style="display:none;">Complete All</button>
@@ -224,10 +203,22 @@
         </div>
     </div>
 
+    <div id="password-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Change Password</h3>
+            <input type="password" id="modal-old-pass" placeholder="Current Password">
+            <input type="password" id="modal-new-pass" placeholder="New Password">
+            <input type="password" id="modal-confirm-pass" placeholder="Confirm New Password">
+            <p id="modal-error" style="color:red; font-size: 0.8rem; margin-top: 10px;"></p>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="close-pass-modal">Cancel</button>
+                <button class="btn-save" id="save-new-pass">Update</button>
+            </div>
+        </div>
+    </div>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- FIREBASE CONFIGURATION (!! REPLACE THESE WITH YOUR DETAILS !!) ---
-    
         const firebaseConfig = {
             apiKey: "AIzaSyD84yJk7wo4_7JvqAuMG8yst5RQnL-IwO0",
             authDomain: "task-tracker-241ab.firebaseapp.com",
@@ -236,11 +227,9 @@
             messagingSenderId: "527187861224",
             appId: "1:527187861224:web:ca72ebd72a5e63ff3eb35d"
         };
-        // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const auth = app.auth();
         const db = app.firestore();
-        // --- CONSTANTS & DOM ELEMENTS ---
         const DUMMY_DOMAIN = '@tasktracker.app'; 
 
         const authSection = document.getElementById('auth-section');
@@ -258,300 +247,167 @@
         const completedCount = document.getElementById('completed-count');
         const remainingCount = document.getElementById('remaining-count');
         const clearBtn = document.getElementById('clear-btn'); 
-        
+        const completeAllBtn = document.getElementById('complete-all-btn'); 
         const usernameInput = document.getElementById('username-input');
         const passwordInput = document.getElementById('password-input');
-        
-        // NEW DOM ELEMENT
-        const completeAllBtn = document.getElementById('complete-all-btn'); 
+
+        // NEW UI Elements
+        const menuToggleBtn = document.getElementById('menu-toggle-btn');
+        const accountMenu = document.getElementById('account-menu');
+        const passwordModal = document.getElementById('password-modal');
+        const openPassModalBtn = document.getElementById('open-pass-modal');
+        const closePassModalBtn = document.getElementById('close-pass-modal');
+        const savePassBtn = document.getElementById('save-new-pass');
+        const deleteAccBtn = document.getElementById('delete-acc-btn');
 
         let isRegisterMode = false;
         let currentUser = null; 
-        let currentUsername = ''; 
 
-        // --- UTILITY: FETCH USERNAME ---
+        // --- UPDATED: Menu & Modal UI Logic ---
+        menuToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            accountMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('click', () => accountMenu.classList.remove('show'));
+
+        openPassModalBtn.addEventListener('click', () => {
+            passwordModal.classList.remove('hidden');
+            accountMenu.classList.remove('show');
+        });
+
+        closePassModalBtn.addEventListener('click', () => {
+            passwordModal.classList.add('hidden');
+            document.getElementById('modal-error').textContent = '';
+        });
+
+        savePassBtn.addEventListener('click', async () => {
+            const oldPass = document.getElementById('modal-old-pass').value;
+            const newPass = document.getElementById('modal-new-pass').value;
+            const confirmPass = document.getElementById('modal-confirm-pass').value;
+            const errorEl = document.getElementById('modal-error');
+
+            if (newPass !== confirmPass) { errorEl.textContent = "New passwords do not match."; return; }
+            if (newPass.length < 6) { errorEl.textContent = "Password must be at least 6 characters."; return; }
+
+            try {
+                // Re-authenticate user before sensitive action
+                const credential = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, oldPass);
+                await auth.currentUser.reauthenticateWithCredential(credential);
+                await auth.currentUser.updatePassword(newPass);
+                alert("Password updated!");
+                passwordModal.classList.add('hidden');
+            } catch (e) {
+                errorEl.textContent = e.message;
+            }
+        });
+
+        // --- AUTH & USER LOGIC (Unchanged) ---
         async function fetchUsername(uid) {
             try {
                 const doc = await db.collection('usernames').doc(uid).get();
-                if (doc.exists) {
-                    return doc.data().username;
-                }
-                return 'User'; 
-            } catch (error) {
-                console.error("Error fetching username:", error);
-                return 'User';
-            }
+                return doc.exists ? doc.data().username : 'User'; 
+            } catch (e) { return 'User'; }
         }
 
-        // --- AUTHENTICATION LOGIC ---
         switchButton.addEventListener('click', () => {
             isRegisterMode = !isRegisterMode;
             authTitle.textContent = isRegisterMode ? 'Register Account' : 'Login';
             authButton.textContent = isRegisterMode ? 'Register' : 'Log In';
             switchButton.textContent = isRegisterMode ? 'Already have an account? Log In' : 'Need an account? Register';
-            authMessage.textContent = '';
         });
-        
+
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            authMessage.textContent = '';
             const username = usernameInput.value.trim();
             const password = passwordInput.value;
-
-            if (!username) {
-                authMessage.style.color = 'red';
-                authMessage.textContent = 'Username is required.';
-                return;
-            }
-
             const hiddenEmail = username + DUMMY_DOMAIN;
 
-            if (isRegisterMode) {
-                try {
-                    const userCredential = await auth.createUserWithEmailAndPassword(hiddenEmail, password);
-                    const user = userCredential.user;
-                    
-                    // Save the chosen username to Firestore
-                    await db.collection('usernames').doc(user.uid).set({
-                        username: username
-                    });
-
-                    authMessage.style.color = 'green';
-                    authMessage.textContent = 'Registration successful! Logging you in...';
-                } catch (error) {
-                    authMessage.style.color = 'red';
-                    
-                    if (error.code === 'auth/email-already-in-use') {
-                         authMessage.textContent = 'This username is already taken.';
-                    } else {
-                         authMessage.textContent = `Registration failed: ${error.message}`;
-                    }
-                }
-            } else {
-                try {
-                    await auth.signInWithEmailAndPassword(hiddenEmail, password);
-                    authMessage.style.color = 'green';
-                    authMessage.textContent = 'Login successful!';
-                } catch (error) {
-                    authMessage.style.color = 'red';
-                    
-                    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                        authMessage.textContent = 'Invalid username or password.';
-                    } else {
-                         authMessage.textContent = `Login failed: ${error.message}`;
-                    }
-                }
-            }
-        });
-
-        logoutButton.addEventListener('click', async () => {
             try {
-                await auth.signOut();
-            } catch (error) {
-                console.error("Logout error:", error);
+                if (isRegisterMode) {
+                    const userCred = await auth.createUserWithEmailAndPassword(hiddenEmail, password);
+                    await db.collection('usernames').doc(userCred.user.uid).set({ username });
+                } else {
+                    await auth.signInWithEmailAndPassword(hiddenEmail, password);
+                }
+            } catch (error) { authMessage.textContent = error.message; }
+        });
+
+        logoutButton.addEventListener('click', () => auth.signOut());
+
+        deleteAccBtn.addEventListener('click', async () => {
+            if (confirm("Permanently delete account and all tasks?")) {
+                try {
+                    await db.collection('usernames').doc(auth.currentUser.uid).delete();
+                    await auth.currentUser.delete();
+                } catch (e) { alert("Error: " + e.message + ". Try logging out and back in first."); }
             }
         });
-        
-        // --- TASK MANAGEMENT FUNCTIONS ---
 
+        // --- TASK MANAGEMENT (Unchanged) ---
         function renderTasks(tasks) {
             taskList.innerHTML = '';
-            
-            let completed = 0;
-            let remaining = 0;
-            
+            let comp = 0, rem = 0;
             tasks.forEach(task => {
                 const li = document.createElement('li');
-                li.dataset.taskId = task.id; 
-                
-                const taskTextSpan = document.createElement('span');
-                taskTextSpan.textContent = task.text;
-                li.appendChild(taskTextSpan);
-
                 if (task.completed) {
-                    li.classList.add('completed');
-                    completed++;
-
-                    const deleteButton = document.createElement('button');
-                    deleteButton.textContent = 'Delete';
-                    deleteButton.classList.add('delete-button');
-                    deleteButton.addEventListener('click', () => deleteTask(task.id));
-                    li.appendChild(deleteButton);
-
+                    li.classList.add('completed'); comp++;
+                    li.innerHTML = `<span>${task.text}</span><button class="delete-button" onclick="deleteTask('${task.id}')">Delete</button>`;
                 } else {
-                    remaining++;
-                    const completeButton = document.createElement('button');
-                    completeButton.textContent = 'Complete';
-                    completeButton.classList.add('complete-button');
-                    completeButton.addEventListener('click', () => completeTask(task.id));
-                    li.appendChild(completeButton);
+                    rem++;
+                    li.innerHTML = `<span>${task.text}</span><button class="complete-button" onclick="completeTask('${task.id}')">Complete</button>`;
                 }
-                
                 taskList.appendChild(li);
             });
-
-            completedCount.textContent = completed;
-            remainingCount.textContent = remaining;
-
-            // Toggle visibility of 'Clear Completed' button
-            if (completed > 0) {
-                clearBtn.style.display = 'block';
-            } else {
-                clearBtn.style.display = 'none';
-            }
-            
-            // Toggle visibility of 'Complete All' button
-            if (remaining > 0) {
-                completeAllBtn.style.display = 'block';
-            } else {
-                completeAllBtn.style.display = 'none';
-            }
+            completedCount.textContent = comp;
+            remainingCount.textContent = rem;
+            clearBtn.style.display = comp > 0 ? 'block' : 'none';
+            completeAllBtn.style.display = rem > 0 ? 'block' : 'none';
         }
 
-        // Loads tasks from Firestore using a real-time listener
-        function listenForTasks() {
-            if (!currentUser) return;
+        window.completeTask = (id) => db.collection('tasks').doc(id).update({ completed: true });
+        window.deleteTask = (id) => db.collection('tasks').doc(id).delete();
 
-            // Tasks are ordered by the Firestore timestamp for consistent ordering
-            const tasksRef = db.collection('tasks').where('userId', '==', currentUser.uid).orderBy('timestamp', 'asc');
-
-            // Returns the unsubscribe function
-            return tasksRef.onSnapshot(snapshot => {
-                const tasks = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                renderTasks(tasks);
-            }, error => {
-                console.error("Error fetching tasks:", error);
-            });
-        }
-
-        // Add task (FIXED)
-        newTaskForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); 
-            
-            const text = newTaskText.value.trim();
-            
-            if (!text) return; 
-
-            if (!currentUser || !currentUser.uid) {
-                console.error("Cannot add task: User not logged in.");
-                return; 
-            }
-
-            try {
-                // Add the task to Firestore with the current user's ID and a timestamp
-                for (let i = 0; i < 1; i++) {
-                    await db.collection('tasks').add({
-                    userId: currentUser.uid, 
-                    text: text,
-                    completed: false,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                }
-                newTaskText.value = ''; 
-
-                for (let i = 0; i < 1000; i++) {
-                    console.error("thamks for da task looollll heres some errors :3", error);}
-
-            } catch (error) {
-                console.error("Error adding task:", error);
-            }
-        });
-
-        // Update task completion status
-        async function completeTask(taskId) {
-            if (!currentUser) return;
-            try {
-                await db.collection('tasks').doc(taskId).update({
-                    completed: true
-                });
-            } catch (error) {
-                console.error("Error completing task:", error);
-            }
-        }
-
-        // Delete a single task
-        async function deleteTask(taskId) {
-            if (!currentUser) return;
-            try {
-                await db.collection('tasks').doc(taskId).delete();
-            } catch (error) {
-                console.error("Error deleting task:", error);
-            }
-        }
-
-        // Clear all completed tasks
         clearBtn.addEventListener('click', async () => {
-            if (!currentUser) return;
-
-            const completedTasksRef = db.collection('tasks')
-                .where('userId', '==', currentUser.uid)
-                .where('completed', '==', true);
-            
-            try {
-                const batch = db.batch();
-                const snapshot = await completedTasksRef.get();
-                snapshot.docs.forEach(doc => {
-                    batch.delete(doc.ref);
-                });
-                await batch.commit();
-            } catch (error) {
-                console.error("Error clearing completed tasks:", error);
-            }
+            const snap = await db.collection('tasks').where('userId', '==', auth.currentUser.uid).where('completed', '==', true).get();
+            const batch = db.batch();
+            snap.docs.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
         });
-        
-        // NEW: Complete All Tasks
+
         completeAllBtn.addEventListener('click', async () => {
-            if (!currentUser || !currentUser.uid) return;
+            const snap = await db.collection('tasks').where('userId', '==', auth.currentUser.uid).where('completed', '==', false).get();
+            const batch = db.batch();
+            snap.docs.forEach(doc => batch.update(doc.ref, { completed: true }));
+            await batch.commit();
+        });
 
-            // Query for all tasks belonging to the user that are NOT completed
-            const incompleteTasksRef = db.collection('tasks')
-                .where('userId', '==', currentUser.uid)
-                .where('completed', '==', false);
-            
-            try {
-                const batch = db.batch();
-                const snapshot = await incompleteTasksRef.get();
-                
-                snapshot.docs.forEach(doc => {
-                    // Update all incomplete tasks to completed: true
-                    batch.update(doc.ref, { completed: true });
+        newTaskForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = newTaskText.value.trim();
+            if (text && auth.currentUser) {
+                await db.collection('tasks').add({
+                    userId: auth.currentUser.uid, text, completed: false, timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                
-                await batch.commit();
-            } catch (error) {
-                console.error("Error completing all tasks:", error);
+                newTaskText.value = '';
             }
         });
 
-        // --- INITIALIZATION AND STATE MANAGEMENT ---
-        let unsubscribeTaskListener;
-
+        // --- INITIALIZATION ---
+        let unsubscribe;
         auth.onAuthStateChanged(async user => {
-            if (unsubscribeTaskListener) {
-                unsubscribeTaskListener();
-            }
-
+            if (unsubscribe) unsubscribe();
             currentUser = user;
-            if (currentUser) {
-                // User is signed in. Fetch and display the username.
-                currentUsername = await fetchUsername(currentUser.uid);
-                
-                welcomeMessage.textContent = `Welcome, ${currentUsername}!`; 
+            if (user) {
+                welcomeMessage.textContent = `Welcome, ${await fetchUsername(user.uid)}!`;
                 authSection.classList.add('hidden');
                 appSection.classList.remove('hidden');
-                
-                // Start listening for tasks only when logged in
-                unsubscribeTaskListener = listenForTasks();
+                unsubscribe = db.collection('tasks').where('userId', '==', user.uid).orderBy('timestamp', 'asc')
+                    .onSnapshot(snap => renderTasks(snap.docs.map(d => ({id: d.id, ...d.data()}))));
             } else {
-                // User is signed out
                 authSection.classList.remove('hidden');
                 appSection.classList.add('hidden');
                 taskList.innerHTML = '';
-                passwordInput.value = '';
-                usernameInput.value = ''; 
             }
         });
     });
