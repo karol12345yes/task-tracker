@@ -321,6 +321,7 @@
             if (newPassInput.value !== confirmPassInput.value) { err.textContent = "New passwords don't match."; return; }
 
             try {
+                // Use the user's current email for re-authentication
                 const cred = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, oldPassInput.value);
                 await auth.currentUser.reauthenticateWithCredential(cred);
                 await auth.currentUser.updatePassword(newPassInput.value);
@@ -333,7 +334,7 @@
             } catch (e) { err.textContent = e.message; }
         });
 
-        // --- Delete Account Logic (Fixed) ---
+        // --- Delete Account Logic (FIXED - Robust Username Lookup) ---
         document.getElementById('open-delete-modal').addEventListener('click', () => {
             deleteModal.classList.remove('hidden');
             deleteModalPass.value = '';
@@ -349,34 +350,41 @@
             }
 
             try {
-                // Check if user is logged in
                 if (!auth.currentUser) {
                     deleteModalError.textContent = "You must be logged in to delete your account.";
                     return;
                 }
-
-                // FIX: Use the active user's email for re-authentication
-                const email = auth.currentUser.email; 
-                const cred = firebase.auth.EmailAuthProvider.credential(email, password);
                 
-                // 1. Re-authenticate the user
+                // 1. Fetch the original username from Firestore for robust credential creation
+                const userDoc = await db.collection('usernames').doc(auth.currentUser.uid).get();
+                if (!userDoc.exists) {
+                    deleteModalError.textContent = 'Error: User profile data not found.';
+                    return;
+                }
+                const username = userDoc.data().username;
+                const fullEmail = username + DUMMY_DOMAIN; // Reconstruct the exact email
+
+                // 2. Create the credential using the reconstructed email and provided password
+                const cred = firebase.auth.EmailAuthProvider.credential(fullEmail, password);
+                
+                // 3. Re-authenticate the user
                 await auth.currentUser.reauthenticateWithCredential(cred);
                 
-                // 2. Delete user's Firestore data first
+                // 4. Delete user's Firestore data first
                 await db.collection('usernames').doc(auth.currentUser.uid).delete();
                 
-                // 3. Delete the user account
+                // 5. Delete the user account
                 await auth.currentUser.delete();
 
                 // On success, Firebase handles logout and auth.onAuthStateChanged will update the UI
             } catch (e) { 
-                // Display a more specific error based on the Firebase error code
-                if (e.code === 'auth/wrong-password') {
+                // Display specific errors
+                if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
                     deleteModalError.textContent = 'Error: The password you entered is incorrect.';
                 } else if (e.code === 'auth/requires-recent-login') {
                     deleteModalError.textContent = 'Error: Security requires you to sign out and sign back in to delete.';
                 } else {
-                    deleteModalError.textContent = 'Error: Could not confirm identity. Try re-entering your password.';
+                    deleteModalError.textContent = `Error: Could not confirm identity. Please ensure your password is correct. (${e.message})`;
                 }
             }
         });
