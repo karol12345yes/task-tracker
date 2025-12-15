@@ -50,6 +50,23 @@
             margin-bottom: 15px;
             position: relative;
         }
+        /* Online Indicator Styling */
+        #welcome-message {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        .online-indicator {
+            height: 10px;
+            width: 10px;
+            background-color: #2ecc71; /* Green color for online */
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 5px rgba(46, 204, 113, 0.7);
+        }
+        
         .menu-container { position: relative; }
         
         #menu-toggle-btn {
@@ -139,7 +156,6 @@
         }
         #task-stats p { margin: 0; font-weight: bold; font-size: 0.9rem; }
         
-        /* Updated: Space between the clear/complete buttons */
         #clear-btn, #complete-all-btn { 
             color: white; 
             border: none; 
@@ -150,7 +166,7 @@
         }
         #clear-btn { 
             background-color: #e74c3c; 
-            margin-right: 12px; /* Increased spacing */
+            margin-right: 12px; 
         }
         #complete-all-btn { 
             background-color: #f39c12; 
@@ -184,12 +200,12 @@
 
         <div id="app-section" class="hidden">
             <div class="header">
-                <span id="welcome-message"></span>
+                <span id="welcome-message"><span class="online-indicator"></span> Hi, User</span>
                 <div class="menu-container">
                     <button id="menu-toggle-btn">Settings ⚙️</button>
                     <div id="account-menu" class="dropdown-menu">
-                        <button id="open-pass-modal">Change Password</button>
                         <button id="logout-button">Sign Out</button>
+                        <button id="open-pass-modal">Change Password</button>
                         <button id="open-delete-modal">Delete Account</button>
                     </div>
                 </div>
@@ -230,8 +246,9 @@
     <div id="delete-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h3 style="color: #ff1d04;">Delete Account?</h3>
-            <p style="font-size: 0.9rem; color: #666;">This action is permanent and will delete all your tasks.</p>
-            <p id="delete-modal-error" style="color:red; font-size: 0.8rem;"></p>
+            <p style="font-size: 0.9rem; color: #666;">This action is permanent and will delete all your tasks. **Re-enter your password to confirm.**</p>
+            <input type="password" id="delete-modal-pass" placeholder="Current Password" required>
+            <p id="delete-modal-error" style="color:red; font-size: 0.8rem; margin-top: 10px;"></p>
             <div class="modal-actions">
                 <button class="btn-cancel" id="close-delete-modal">Cancel</button>
                 <button class="btn-danger" id="confirm-delete-btn">Permanently Delete</button>
@@ -273,7 +290,9 @@
               menuToggleBtn = document.getElementById('menu-toggle-btn'),
               accountMenu = document.getElementById('account-menu'),
               passwordModal = document.getElementById('password-modal'),
-              deleteModal = document.getElementById('delete-modal');
+              deleteModal = document.getElementById('delete-modal'),
+              deleteModalPass = document.getElementById('delete-modal-pass'),
+              deleteModalError = document.getElementById('delete-modal-error');
 
         let isRegisterMode = false;
 
@@ -286,6 +305,9 @@
             passwordModal.classList.remove('hidden');
             document.getElementById('modal-error').textContent = '';
             document.getElementById('modal-success').textContent = '';
+            document.getElementById('modal-old-pass').value = '';
+            document.getElementById('modal-new-pass').value = '';
+            document.getElementById('modal-confirm-pass').value = '';
         });
         document.getElementById('close-pass-modal').addEventListener('click', () => passwordModal.classList.add('hidden'));
 
@@ -303,6 +325,7 @@
                 await auth.currentUser.reauthenticateWithCredential(cred);
                 await auth.currentUser.updatePassword(newPassInput.value);
                 
+                // Clear inputs on success
                 oldPassInput.value = ""; newPassInput.value = ""; confirmPassInput.value = "";
                 err.textContent = "";
                 success.textContent = "Success! Password updated.";
@@ -310,17 +333,52 @@
             } catch (e) { err.textContent = e.message; }
         });
 
-        // --- Delete Account Logic ---
+        // --- Delete Account Logic (Fixed) ---
         document.getElementById('open-delete-modal').addEventListener('click', () => {
             deleteModal.classList.remove('hidden');
-            document.getElementById('delete-modal-error').textContent = '';
+            deleteModalPass.value = '';
+            deleteModalError.textContent = '';
         });
         document.getElementById('close-delete-modal').addEventListener('click', () => deleteModal.classList.add('hidden'));
+
         document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+            const password = deleteModalPass.value;
+            if (!password) {
+                deleteModalError.textContent = "Please enter your current password.";
+                return;
+            }
+
             try {
+                // Check if user is logged in
+                if (!auth.currentUser) {
+                    deleteModalError.textContent = "You must be logged in to delete your account.";
+                    return;
+                }
+
+                // FIX: Use the active user's email for re-authentication
+                const email = auth.currentUser.email; 
+                const cred = firebase.auth.EmailAuthProvider.credential(email, password);
+                
+                // 1. Re-authenticate the user
+                await auth.currentUser.reauthenticateWithCredential(cred);
+                
+                // 2. Delete user's Firestore data first
                 await db.collection('usernames').doc(auth.currentUser.uid).delete();
+                
+                // 3. Delete the user account
                 await auth.currentUser.delete();
-            } catch (e) { document.getElementById('delete-modal-error').textContent = "Security limit: Log out and in again to delete."; }
+
+                // On success, Firebase handles logout and auth.onAuthStateChanged will update the UI
+            } catch (e) { 
+                // Display a more specific error based on the Firebase error code
+                if (e.code === 'auth/wrong-password') {
+                    deleteModalError.textContent = 'Error: The password you entered is incorrect.';
+                } else if (e.code === 'auth/requires-recent-login') {
+                    deleteModalError.textContent = 'Error: Security requires you to sign out and sign back in to delete.';
+                } else {
+                    deleteModalError.textContent = 'Error: Could not confirm identity. Try re-entering your password.';
+                }
+            }
         });
 
         // --- Auth Core Logic ---
@@ -382,11 +440,21 @@
         auth.onAuthStateChanged(async u => {
             if (unsub) unsub();
             if (u) {
-                const doc = await db.collection('usernames').doc(u.uid).get();
-                welcomeMessage.textContent = `Hi, ${doc.exists ? doc.data().username : 'User'}`;
-                authSection.classList.add('hidden'); appSection.classList.remove('hidden');
+                // Correctly fetch the username and set the welcome message with the online indicator
+                const docRef = db.collection('usernames').doc(u.uid);
+                const doc = await docRef.get();
+                const username = doc.exists ? doc.data().username : 'User';
+
+                welcomeMessage.innerHTML = `<span class="online-indicator"></span> Hi, ${username}`;
+                
+                authSection.classList.add('hidden'); 
+                appSection.classList.remove('hidden');
+                
                 unsub = db.collection('tasks').where('userId', '==', u.uid).orderBy('timestamp', 'asc').onSnapshot(s => renderTasks(s.docs.map(d => ({id: d.id, ...d.data()}))));
-            } else { authSection.classList.remove('hidden'); appSection.classList.add('hidden'); }
+            } else { 
+                authSection.classList.remove('hidden'); 
+                appSection.classList.add('hidden'); 
+            }
         });
     });
 </script>
