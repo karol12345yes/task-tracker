@@ -177,10 +177,39 @@
         #new-task-text { flex-grow: 1; padding: 10px; border-radius: 4px 0 0 4px; border: 1px solid #ddd; }
         #new-task-form button { padding: 10px 15px; background-color: #2ecc50; color: white; border: none; border-radius: 0 4px 4px 0; cursor: pointer; }
         #task-list { list-style: none; padding: 0; }
-        #task-list li { display: flex; justify-content: space-between; align-items: center; padding: 10px; margin-bottom: 8px; background: #fff; border: 1px solid #eee; border-radius: 4px; }
+        #task-list li { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 10px; 
+            margin-bottom: 8px; 
+            background: #fff; 
+            border: 1px solid #eee; 
+            border-radius: 4px; 
+        }
         #task-list li.completed { background-color: #d4edda; text-decoration: line-through; color: #6c757d; }
+        
+        /* Buttons for Incomplete Tasks */
         .complete-button { background: #007acc; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-        .delete-button { background: #ff1900; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-left: 10px; }
+        
+        /* Buttons for Completed Tasks */
+        .uncomplete-button { 
+            background: #f39c12; /* Orange */
+            color: white; 
+            border: none; 
+            padding: 5px 10px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin-right: 10px;
+        }
+        .delete-button { 
+            background: #ff1900; 
+            color: white; 
+            border: none; 
+            padding: 5px 10px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+        }
     </style>
 </head>
 <body>
@@ -334,7 +363,7 @@
             } catch (e) { err.textContent = e.message; }
         });
 
-        // --- Delete Account Logic (FIXED - Robust Username Lookup) ---
+        // --- Delete Account Logic ---
         document.getElementById('open-delete-modal').addEventListener('click', () => {
             deleteModal.classList.remove('hidden');
             deleteModalPass.value = '';
@@ -410,21 +439,44 @@
 
         logoutButton.addEventListener('click', () => auth.signOut());
 
-        // --- Task Management ---
+        // --- Task Management Functions ---
+        window.completeTask = (id) => db.collection('tasks').doc(id).update({ completed: true });
+        window.uncompleteTask = (id) => db.collection('tasks').doc(id).update({ completed: false }); // NEW FUNCTION
+        window.deleteTask = (id) => db.collection('tasks').doc(id).delete();
+        
+        // --- Task List Rendering (Updated) ---
         function renderTasks(tasks) {
             taskList.innerHTML = '';
             let c = 0, r = 0;
             tasks.forEach(t => {
                 const li = document.createElement('li');
-                if (t.completed) { li.classList.add('completed'); c++; li.innerHTML = `<span>${t.text}</span><button class="delete-button" onclick="deleteTask('${t.id}')">Delete</button>`; }
-                else { r++; li.innerHTML = `<span>${t.text}</span><button class="complete-button" onclick="completeTask('${t.id}')">Complete</button>`; }
+                if (t.completed) { 
+                    li.classList.add('completed'); 
+                    c++; 
+                    // Show Uncomplete and Delete for completed tasks
+                    li.innerHTML = `
+                        <span>${t.text}</span>
+                        <div>
+                            <button class="uncomplete-button" onclick="uncompleteTask('${t.id}')">Uncomplete</button>
+                            <button class="delete-button" onclick="deleteTask('${t.id}')">Delete</button>
+                        </div>
+                    `; 
+                }
+                else { 
+                    r++; 
+                    // Show Complete for incomplete tasks
+                    li.innerHTML = `
+                        <span>${t.text}</span>
+                        <button class="complete-button" onclick="completeTask('${t.id}')">Complete</button>
+                    `; 
+                }
                 taskList.appendChild(li);
             });
-            completedCount.textContent = c; remainingCount.textContent = r;
-            clearBtn.style.display = c > 0 ? 'inline-block' : 'none'; completeAllBtn.style.display = r > 0 ? 'inline-block' : 'none';
+            completedCount.textContent = c; 
+            remainingCount.textContent = r;
+            clearBtn.style.display = c > 0 ? 'inline-block' : 'none'; 
+            completeAllBtn.style.display = r > 0 ? 'inline-block' : 'none';
         }
-        window.completeTask = (id) => db.collection('tasks').doc(id).update({ completed: true });
-        window.deleteTask = (id) => db.collection('tasks').doc(id).delete();
         
         clearBtn.addEventListener('click', async () => {
             const snap = await db.collection('tasks').where('userId', '==', auth.currentUser.uid).where('completed', '==', true).get();
