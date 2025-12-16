@@ -48,7 +48,6 @@
             font-weight: bold;
             transition: background-color 0.2s ease;
         }
-        #auth-button:hover { background-color: #005a9e; }
         #auth-button:disabled { 
             background-color: #cccccc !important; 
             color: #666666;
@@ -136,7 +135,7 @@
                 <p>Left: <span id="remaining-count">0</span></p>
                 <div>
                     <button id="clear-btn" style="display:none;">Clear Done</button>
-                    <button id="complete-all-btn" style="display:none;">All Done</button>
+                    <button id="complete-all-btn" style="display:none;">Complete All</button>
                 </div>
             </div>
 
@@ -194,15 +193,12 @@
 
         let unsub, isRegisterMode = false, currentUsername = 'User';
 
-        // --- UI Selectors ---
+        // --- UI Logic ---
         const authBtn = document.getElementById('auth-button');
         const authMsg = document.getElementById('auth-message');
-        const authTitle = document.getElementById('auth-title');
-        const switchBtn = document.getElementById('switch-button');
-        const appSection = document.getElementById('app-section');
-        const authSection = document.getElementById('auth-section');
+        const clearBtn = document.getElementById('clear-btn');
+        const completeAllBtn = document.getElementById('complete-all-btn');
 
-        // --- Menu & Modal UI ---
         document.getElementById('menu-toggle-btn').onclick = (e) => {
             e.stopPropagation();
             document.getElementById('account-menu').classList.toggle('show');
@@ -215,31 +211,26 @@
         document.getElementById('open-delete-modal').onclick = () => document.getElementById('delete-modal').classList.remove('hidden');
         document.getElementById('close-delete-modal').onclick = () => closeModal('delete-modal');
 
-        // --- Status Dot ---
         function updateStatusUI(isFromCache) {
             if (!auth.currentUser) return;
             const dotClass = isFromCache ? 'status-offline' : 'status-online';
             document.getElementById('welcome-message').innerHTML = `<span class="online-indicator ${dotClass}"></span> ${isFromCache ? 'Offline' : 'Hi, ' + currentUsername}`;
         }
 
-        // --- Core Auth Logic ---
-        switchBtn.onclick = () => {
+        // --- Auth Logic ---
+        document.getElementById('switch-button').onclick = () => {
             isRegisterMode = !isRegisterMode;
-            authTitle.innerText = isRegisterMode ? 'Register' : 'Login';
+            document.getElementById('auth-title').innerText = isRegisterMode ? 'Register' : 'Login';
             authBtn.innerText = isRegisterMode ? 'Register' : 'Log In';
-            switchBtn.innerText = isRegisterMode ? 'Have an account? Login' : 'Need an account? Register';
+            document.getElementById('switch-button').innerText = isRegisterMode ? 'Have an account? Login' : 'Need an account? Register';
         };
 
         document.getElementById('auth-form').onsubmit = async (e) => {
             e.preventDefault();
             const user = document.getElementById('username-input').value.trim();
             const pass = document.getElementById('password-input').value;
-            
-            // Visual feedback
             authBtn.disabled = true;
-            authBtn.innerText = isRegisterMode ? "Creating Account..." : "Signing In...";
-            authMsg.innerText = "";
-
+            authBtn.innerText = isRegisterMode ? "Creating..." : "Signing In...";
             try {
                 if (isRegisterMode) {
                     const res = await auth.createUserWithEmailAndPassword(user + DUMMY_DOMAIN, pass);
@@ -256,22 +247,36 @@
 
         document.getElementById('logout-button').onclick = () => auth.signOut();
 
+        // --- Bulk Actions ---
+        clearBtn.onclick = async () => {
+            const snap = await db.collection('tasks')
+                .where('userId', '==', auth.currentUser.uid)
+                .where('completed', '==', true).get();
+            const batch = db.batch();
+            snap.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+        };
+
+        completeAllBtn.onclick = async () => {
+            const snap = await db.collection('tasks')
+                .where('userId', '==', auth.currentUser.uid)
+                .where('completed', '==', false).get();
+            const batch = db.batch();
+            snap.forEach(doc => batch.update(doc.ref, { completed: true }));
+            await batch.commit();
+        };
+
         // --- Account Actions ---
         document.getElementById('save-new-pass').onclick = async () => {
             const oldP = document.getElementById('modal-old-pass').value;
             const newP = document.getElementById('modal-new-pass').value;
-            const err = document.getElementById('modal-error');
-            const btn = document.getElementById('save-new-pass');
-            
-            btn.disabled = true;
             try {
                 const cred = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, oldP);
                 await auth.currentUser.reauthenticateWithCredential(cred);
                 await auth.currentUser.updatePassword(newP);
                 document.getElementById('modal-success').innerText = "Updated!";
                 setTimeout(() => closeModal('password-modal'), 1500);
-            } catch (e) { err.innerText = e.message; }
-            btn.disabled = false;
+            } catch (e) { document.getElementById('modal-error').innerText = e.message; }
         };
 
         document.getElementById('confirm-delete-btn').onclick = async () => {
@@ -284,7 +289,7 @@
             } catch (e) { document.getElementById('delete-modal-error').innerText = e.message; }
         };
 
-        // --- Task Handling ---
+        // --- Tasks ---
         window.completeTask = (id) => db.collection('tasks').doc(id).update({ completed: true });
         window.uncompleteTask = (id) => db.collection('tasks').doc(id).update({ completed: false });
         window.deleteTask = (id) => db.collection('tasks').doc(id).delete();
@@ -306,28 +311,25 @@
             });
             document.getElementById('completed-count').innerText = c;
             document.getElementById('remaining-count').innerText = r;
-            document.getElementById('clear-btn').style.display = c > 0 ? 'inline-block' : 'none';
-            document.getElementById('complete-all-btn').style.display = r > 0 ? 'inline-block' : 'none';
+            clearBtn.style.display = c > 0 ? 'inline-block' : 'none';
+            completeAllBtn.style.display = r > 0 ? 'inline-block' : 'none';
         }
 
         auth.onAuthStateChanged(async u => {
             if (unsub) unsub();
             if (u) {
-                authSection.classList.add('hidden');
-                appSection.classList.remove('hidden');
-                document.getElementById('welcome-message').innerHTML = `<span class="online-indicator status-connecting"></span> Syncing...`;
-                
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('app-section').classList.remove('hidden');
                 const doc = await db.collection('usernames').doc(u.uid).get();
                 currentUsername = doc.exists ? doc.data().username : 'User';
-
                 unsub = db.collection('tasks').where('userId', '==', u.uid).orderBy('timestamp', 'asc')
                     .onSnapshot({ includeMetadataChanges: true }, (snap) => {
                         updateStatusUI(snap.metadata.fromCache);
                         renderTasks(snap.docs.map(d => ({id: d.id, ...d.data()})));
                     });
             } else {
-                authSection.classList.remove('hidden');
-                appSection.classList.add('hidden');
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('app-section').classList.add('hidden');
                 authBtn.disabled = false;
                 authBtn.innerText = isRegisterMode ? 'Register' : 'Log In';
             }
