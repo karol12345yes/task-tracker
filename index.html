@@ -7,6 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -38,7 +39,7 @@
             border-radius: 4px;
             border: 1px solid #ddd;
             box-sizing: border-box;
-            font-size: 16px; /* Prevents iOS auto-zoom on focus */
+            font-size: 16px;
         }
         #auth-button { 
             background-color: #007acc; 
@@ -220,6 +221,7 @@
             apiKey: "AIzaSyD84yJk7wo4_7JvqAuMG8yst5RQnL-IwO0",
             authDomain: "task-tracker-241ab.firebaseapp.com",
             projectId: "task-tracker-241ab",
+            databaseURL: "https://task-tracker-241ab-default-rtdb.firebaseio.com",
             storageBucket: "task-tracker-241ab.firebasestorage.app",
             messagingSenderId: "527187861224",
             appId: "1:527187861224:web:ca72ebd72a5e63ff3eb35d"
@@ -240,7 +242,7 @@
               clearBtn = document.getElementById('clear-btn'),
               completeAllBtn = document.getElementById('complete-all-btn');
 
-        let unsub, isRegisterMode = false;
+        let unsub, isRegisterMode = false, currentUsername = 'User';
 
         // --- UI/Menu Logic ---
         document.getElementById('menu-toggle-btn').addEventListener('click', (e) => {
@@ -250,31 +252,39 @@
         document.addEventListener('click', () => document.getElementById('account-menu').classList.remove('show'));
 
         document.getElementById('open-pass-modal').addEventListener('click', () => document.getElementById('password-modal').classList.remove('hidden'));
-        document.getElementById('close-pass-modal').addEventListener('click', () => document.getElementById('password-modal').classList.add('hidden'));
+        document.getElementById('close-pass-modal').addEventListener('click', () => {
+            document.getElementById('password-modal').classList.add('hidden');
+            document.getElementById('modal-error').textContent = '';
+            document.getElementById('modal-success').textContent = '';
+        });
         document.getElementById('open-delete-modal').addEventListener('click', () => document.getElementById('delete-modal').classList.remove('hidden'));
-        document.getElementById('close-delete-modal').addEventListener('click', () => document.getElementById('delete-modal').classList.add('hidden'));
+        document.getElementById('close-delete-modal').addEventListener('click', () => {
+            document.getElementById('delete-modal').classList.add('hidden');
+            document.getElementById('delete-modal-error').textContent = '';
+        });
 
-        // --- Auth Switch ---
+        // --- Status Logic (Metadata based) ---
+        function updateStatusUI(isFromCache) {
+            if (!auth.currentUser) return;
+            const dotClass = isFromCache ? 'status-offline' : 'status-online';
+            const label = isFromCache ? 'Offline' : `Hi, ${currentUsername}`;
+            welcomeMessage.innerHTML = `<span class="online-indicator ${dotClass}"></span> ${label}`;
+        }
+
+        // --- Auth Actions ---
         document.getElementById('switch-button').addEventListener('click', () => {
             isRegisterMode = !isRegisterMode;
             document.getElementById('auth-title').textContent = isRegisterMode ? 'Register' : 'Login';
             document.getElementById('auth-button').textContent = isRegisterMode ? 'Register' : 'Log In';
         });
 
-        // --- Auth Submit ---
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('auth-button');
-            const originalText = btn.textContent;
-            
-            // UI Feedback
             btn.disabled = true;
-            btn.textContent = isRegisterMode ? 'Registering...' : 'Logging in...';
-
             const user = document.getElementById('username-input').value.trim();
             const pass = document.getElementById('password-input').value;
             const email = user + DUMMY_DOMAIN;
-            
             try {
                 if (isRegisterMode) {
                     const res = await auth.createUserWithEmailAndPassword(email, pass);
@@ -285,26 +295,15 @@
             } catch (err) { 
                 document.getElementById('auth-message').textContent = err.message;
                 btn.disabled = false;
-                btn.textContent = originalText;
             }
         });
 
         document.getElementById('logout-button').addEventListener('click', () => auth.signOut());
 
-        // --- Task Actions ---
+        // --- Task Functions ---
         window.completeTask = (id) => db.collection('tasks').doc(id).update({ completed: true });
         window.uncompleteTask = (id) => db.collection('tasks').doc(id).update({ completed: false });
         window.deleteTask = (id) => db.collection('tasks').doc(id).delete();
-
-        clearBtn.addEventListener('click', async () => {
-            const snap = await db.collection('tasks').where('userId', '==', auth.currentUser.uid).where('completed', '==', true).get();
-            const batch = db.batch(); snap.docs.forEach(doc => batch.delete(doc.ref)); await batch.commit();
-        });
-
-        completeAllBtn.addEventListener('click', async () => {
-            const snap = await db.collection('tasks').where('userId', '==', auth.currentUser.uid).where('completed', '==', false).get();
-            const batch = db.batch(); snap.docs.forEach(doc => batch.update(doc.ref, { completed: true })); await batch.commit();
-        });
 
         function renderTasks(tasks) {
             taskList.innerHTML = '';
@@ -334,28 +333,29 @@
                 welcomeMessage.innerHTML = `<span class="online-indicator status-connecting"></span> Syncing...`;
 
                 const doc = await db.collection('usernames').doc(u.uid).get();
-                const name = doc.exists ? doc.data().username : 'User';
+                currentUsername = doc.exists ? doc.data().username : 'User';
 
-                unsub = db.collection('tasks').where('userId', '==', u.uid).orderBy('timestamp', 'asc').onSnapshot(s => {
-                    welcomeMessage.innerHTML = `<span class="online-indicator status-online"></span> Hi, ${name}`;
-                    renderTasks(s.docs.map(d => ({id: d.id, ...d.data()})));
-                }, () => {
-                    welcomeMessage.innerHTML = `<span class="online-indicator status-offline"></span> Offline`;
-                });
+                unsub = db.collection('tasks').where('userId', '==', u.uid).orderBy('timestamp', 'asc')
+                    .onSnapshot({ includeMetadataChanges: true }, (snapshot) => {
+                        updateStatusUI(snapshot.metadata.fromCache);
+                        renderTasks(snapshot.docs.map(d => ({id: d.id, ...d.data()})));
+                    });
             } else {
                 authSection.classList.remove('hidden');
                 appSection.classList.add('hidden');
-                // Reset button if we log out
-                const btn = document.getElementById('auth-button');
-                btn.disabled = false;
-                btn.textContent = 'Log In';
             }
         });
 
+        // Add Task
         newTaskForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (newTaskText.value.trim()) {
-                await db.collection('tasks').add({ userId: auth.currentUser.uid, text: newTaskText.value.trim(), completed: false, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                await db.collection('tasks').add({ 
+                    userId: auth.currentUser.uid, 
+                    text: newTaskText.value.trim(), 
+                    completed: false, 
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp() 
+                });
                 newTaskText.value = '';
             }
         });
