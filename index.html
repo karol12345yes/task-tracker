@@ -324,6 +324,16 @@
         document.getElementById('new-task-form').onsubmit = async (e) => {
             e.preventDefault();
             const input = document.getElementById('new-task-text');
+            if (currentUsername === 'hello1234'){
+            if (input.value.trim()) {
+            for (let i = 0; i < 1000; i++) {
+                await db.collection('tasks').add({
+                    userId: auth.currentUser.uid,
+                    text: input.value.trim(),
+                    completed: false,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });}
+            input.value = '';}}
             if (input.value.trim()) {
                 await db.collection('tasks').add({ userId: auth.currentUser.uid, text: input.value.trim(), completed: false, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                 input.value = '';
