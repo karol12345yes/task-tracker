@@ -13,11 +13,42 @@
         h1 { text-align: center; color: #333; }
         .hidden { display: none !important; }
 
-        /* --- Auth Styling --- */
-        #auth-form input, #auth-form button, #switch-button { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
-        #auth-button { background-color: #007acc; color: white; border: none; cursor: pointer; font-weight: bold; transition: background-color 0.2s ease; }
-        #auth-button:disabled { background-color: #cccccc !important; color: #666666; cursor: not-allowed; }
-        #switch-button { background-color: #eee; cursor: pointer; border: none; }
+        /* --- Mobile Enhanced Auth Styling --- */
+        #auth-form input { 
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            border-radius: 4px; 
+            border: 1px solid #ddd; 
+            box-sizing: border-box; 
+            font-size: 16px; /* Prevents iOS auto-zoom on focus */
+        }
+        #auth-button { 
+            width: 100%; 
+            min-height: 48px; /* Standard mobile touch target size */
+            padding: 12px; 
+            margin-bottom: 10px; 
+            border-radius: 4px; 
+            border: none;
+            background-color: #007acc; 
+            color: white; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 16px;
+            transition: background-color 0.2s ease; 
+            -webkit-appearance: none; /* Fixes potential iOS button rendering issues */
+        }
+        #switch-button { 
+            width: 100%; 
+            min-height: 44px;
+            padding: 12px; 
+            margin-bottom: 10px; 
+            border-radius: 4px; 
+            border: none;
+            background-color: #eee; 
+            cursor: pointer; 
+            font-size: 14px;
+        }
         #auth-message { color: red; text-align: center; font-size: 0.9rem; margin-top: 5px; }
 
         /* --- Password Strength UI --- */
@@ -41,8 +72,8 @@
 
         /* --- Modals --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 320px; }
-        .modal-content input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ddd; box-sizing: border-box; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 320px; }
+        .modal-content input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         .btn-save { background: #007acc; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
         .btn-cancel { background: #eee; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
@@ -57,20 +88,15 @@
         .task-main { display: flex; align-items: center; flex-grow: 1; gap: 12px; }
         
         /* LOCKED CUSTOM STYLING */
-        .edit-icon { 
-            cursor: pointer; 
-            font-size: 14px; 
-            filter: grayscale(100%); 
-            opacity: 0.6; 
-            transition: all 0.2s ease; 
-        }
+        .edit-icon { cursor: pointer; font-size: 14px; filter: grayscale(100%); opacity: 0.6; transition: all 0.2s ease; }
         .edit-icon:hover { opacity: 1; filter: grayscale(100%); }
         .completed .edit-icon { display: none; } 
 
         .task-actions { display: flex; gap: 5px; }
-        .complete-button { background: #007acc; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-        .uncomplete-button { background: #f39c12; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-        .delete-button { background: #ff1900; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .complete-button, .uncomplete-button, .delete-button { border: none; padding: 8px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .complete-button { background: #007acc; color: white; }
+        .uncomplete-button { background: #f39c12; color: white; }
+        .delete-button { background: #ff1900; color: white; }
         
         #new-task-form { display: flex; margin-bottom: 20px; }
         #new-task-text { flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px 0 0 4px; font-size: 16px;}
@@ -80,7 +106,6 @@
 <body>
     <div class="container">
         <h1>Task Tracker</h1>
-        
         <div id="auth-section">
             <h2 id="auth-title">Login</h2>
             <form id="auth-form">
@@ -106,7 +131,6 @@
                     </div>
                 </div>
             </div>
-
             <div id="task-stats">
                 <p>Done: <span id="completed-count">0</span></p>
                 <p>Left: <span id="remaining-count">0</span></p>
@@ -115,7 +139,6 @@
                     <button id="complete-all-btn" style="display:none; background-color: #f39c12; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;">Complete All</button>
                 </div>
             </div>
-
             <form id="new-task-form">
                 <input type="text" id="new-task-text" placeholder="Enter task..." required>
                 <button type="submit">Add</button>
@@ -127,14 +150,13 @@
     <div id="edit-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h3>Edit Task</h3>
-            <input type="text" id="edit-task-input" placeholder="Task name">
+            <input type="text" id="edit-task-input">
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="document.getElementById('edit-modal').classList.add('hidden')">Cancel</button>
-                <button class="btn-save" id="save-edit-btn">Save Change</button>
+                <button class="btn-save" id="save-edit-btn">Save</button>
             </div>
         </div>
     </div>
-
     <div id="password-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h3>Change Password</h3>
@@ -151,7 +173,6 @@
             </div>
         </div>
     </div>
-
     <div id="delete-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h3 style="color:red">Delete Account?</h3>
@@ -179,7 +200,6 @@
         const auth = firebase.auth(), db = firebase.firestore(), DUMMY_DOMAIN = '@tasktracker.app';
         let unsub, isRegisterMode = false, currentUsername = 'User', editingTaskId = null;
 
-        // --- Password Strength UI Logic ---
         function getStrength(p) {
             let s = 0; if (p.length > 6) s++; if (p.length > 10) s++;
             if (/[A-Z]/.test(p)) s++; if (/[0-9]/.test(p)) s++; if (/[^A-Za-z0-9]/.test(p)) s++;
@@ -201,14 +221,12 @@
         document.getElementById('password-input').oninput = (e) => { if(isRegisterMode) updateMeter(e.target.value, 'auth-strength-bar', 'auth-strength-text'); };
         document.getElementById('modal-new-pass').oninput = (e) => updateMeter(e.target.value, 'change-strength-bar', 'change-strength-text');
 
-        // --- Task Functions (The Fix) ---
         window.completeTask = (id) => db.collection('tasks').doc(id).update({ completed: true });
         window.uncompleteTask = (id) => db.collection('tasks').doc(id).update({ completed: false });
         window.deleteTask = (id) => db.collection('tasks').doc(id).delete();
 
         function renderTasks(tasks) {
-            const list = document.getElementById('task-list');
-            list.innerHTML = '';
+            const list = document.getElementById('task-list'); list.innerHTML = '';
             let c = 0, r = 0;
             tasks.forEach(t => {
                 const li = document.createElement('li');
@@ -217,14 +235,7 @@
                     li.innerHTML = `<div class="task-main"><span>${t.text}</span></div><div class="task-actions"><button class="uncomplete-button" onclick="uncompleteTask('${t.id}')">Undo</button><button class="delete-button" onclick="deleteTask('${t.id}')">Delete</button></div>`;
                 } else {
                     r++;
-                    li.innerHTML = `
-                        <div class="task-main">
-                            <span class="edit-icon" onclick="startEdit('${t.id}', '${t.text.replace(/'/g, "\\'")}')">✏️</span>
-                            <span>${t.text}</span>
-                        </div>
-                        <div class="task-actions">
-                            <button class="complete-button" onclick="completeTask('${t.id}')">Complete</button>
-                        </div>`;
+                    li.innerHTML = `<div class="task-main"><span class="edit-icon" onclick="startEdit('${t.id}', '${t.text.replace(/'/g, "\\'")}')">✏️</span><span>${t.text}</span></div><div class="task-actions"><button class="complete-button" onclick="completeTask('${t.id}')">Complete</button></div>`;
                 }
                 list.appendChild(li);
             });
@@ -234,7 +245,6 @@
             document.getElementById('complete-all-btn').style.display = r > 0 ? 'inline-block' : 'none';
         }
 
-        // --- Auth Implementation ---
         auth.onAuthStateChanged(async u => {
             if (unsub) unsub();
             if (u) {
@@ -249,7 +259,6 @@
             } else { document.getElementById('auth-section').classList.remove('hidden'); document.getElementById('app-section').classList.add('hidden'); }
         });
 
-        // Other UI & Feature Logic
         document.getElementById('switch-button').onclick = () => {
             isRegisterMode = !isRegisterMode;
             document.getElementById('auth-title').innerText = isRegisterMode ? 'Register' : 'Login';
@@ -290,26 +299,16 @@
                 const cred = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, pass);
                 await auth.currentUser.reauthenticateWithCredential(cred);
                 const tasks = await db.collection('tasks').where('userId', '==', auth.currentUser.uid).get();
-                const batch = db.batch();
-                tasks.forEach(doc => batch.delete(doc.ref));
+                const batch = db.batch(); tasks.forEach(doc => batch.delete(doc.ref));
                 batch.delete(db.collection('usernames').doc(auth.currentUser.uid));
-                await batch.commit();
-                await auth.currentUser.delete();
+                await batch.commit(); await auth.currentUser.delete();
             } catch (e) { document.getElementById('delete-modal-error').innerText = e.message; }
         };
 
-        window.startEdit = (id, text) => {
-            editingTaskId = id;
-            document.getElementById('edit-task-input').value = text;
-            document.getElementById('edit-modal').classList.remove('hidden');
-        };
-
+        window.startEdit = (id, text) => { editingTaskId = id; document.getElementById('edit-task-input').value = text; document.getElementById('edit-modal').classList.remove('hidden'); };
         document.getElementById('save-edit-btn').onclick = async () => {
             const text = document.getElementById('edit-task-input').value.trim();
-            if (text && editingTaskId) {
-                await db.collection('tasks').doc(editingTaskId).update({ text });
-                document.getElementById('edit-modal').classList.add('hidden');
-            }
+            if (text && editingTaskId) { await db.collection('tasks').doc(editingTaskId).update({ text }); document.getElementById('edit-modal').classList.add('hidden'); }
         };
 
         document.getElementById('clear-btn').onclick = async () => {
