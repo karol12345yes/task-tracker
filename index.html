@@ -13,42 +13,10 @@
         h1 { text-align: center; color: #333; }
         .hidden { display: none !important; }
 
-        /* --- Mobile Enhanced Auth Styling --- */
-        #auth-form input { 
-            width: 100%; 
-            padding: 12px; 
-            margin-bottom: 10px; 
-            border-radius: 4px; 
-            border: 1px solid #ddd; 
-            box-sizing: border-box; 
-            font-size: 16px; /* Prevents iOS auto-zoom on focus */
-        }
-        #auth-button { 
-            width: 100%; 
-            min-height: 48px; /* Standard mobile touch target size */
-            padding: 12px; 
-            margin-bottom: 10px; 
-            border-radius: 4px; 
-            border: none;
-            background-color: #007acc; 
-            color: white; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 16px;
-            transition: background-color 0.2s ease; 
-            -webkit-appearance: none; /* Fixes potential iOS button rendering issues */
-        }
-        #switch-button { 
-            width: 100%; 
-            min-height: 44px;
-            padding: 12px; 
-            margin-bottom: 10px; 
-            border-radius: 4px; 
-            border: none;
-            background-color: #eee; 
-            cursor: pointer; 
-            font-size: 14px;
-        }
+        /* --- Auth Styling --- */
+        #auth-form input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
+        #auth-button { width: 100%; min-height: 48px; padding: 12px; margin-bottom: 10px; border-radius: 4px; border: none; background-color: #007acc; color: white; cursor: pointer; font-weight: bold; font-size: 16px; transition: background-color 0.2s ease; }
+        #switch-button { width: 100%; min-height: 44px; padding: 12px; margin-bottom: 10px; border-radius: 4px; border: none; background-color: #eee; cursor: pointer; font-size: 14px; }
         #auth-message { color: red; text-align: center; font-size: 0.9rem; margin-top: 5px; }
 
         /* --- Password Strength UI --- */
@@ -61,6 +29,7 @@
         #welcome-message { display: flex; align-items: center; gap: 8px; font-weight: bold; }
         .online-indicator { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
         .status-online { background-color: #2ecc71; box-shadow: 0 0 5px rgba(46, 204, 113, 0.7); }
+        .status-offline { background-color: #e74c3c; box-shadow: 0 0 5px rgba(231, 76, 60, 0.7); }
 
         /* --- Settings Menu --- */
         .menu-container { position: relative; }
@@ -82,24 +51,24 @@
         /* --- Task List Layout --- */
         #task-stats { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f9f9f9; border-radius: 4px; margin-bottom: 15px; }
         #task-stats p { margin: 0; font-weight: bold; font-size: 0.9rem; }
+        
+        /* Stats Buttons Re-colored */
+        #clear-btn { background-color: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
+        #complete-all-btn { background-color: #f39c12; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
+
         #task-list { list-style: none; padding: 0; }
         #task-list li { display: flex; justify-content: space-between; align-items: center; padding: 10px; margin-bottom: 8px; background: #fff; border: 1px solid #eee; border-radius: 4px; }
         #task-list li.completed { background-color: #d4edda; text-decoration: line-through; color: #6c757d; }
         .task-main { display: flex; align-items: center; flex-grow: 1; gap: 12px; }
-        
-        /* LOCKED CUSTOM STYLING */
-        .edit-icon { cursor: pointer; font-size: 14px; filter: grayscale(100%); opacity: 0.6; transition: all 0.2s ease; }
-        .edit-icon:hover { opacity: 1; filter: grayscale(100%); }
+        .edit-icon { cursor: pointer; font-size: 14px; filter: grayscale(100%); opacity: 0.6; }
         .completed .edit-icon { display: none; } 
-
         .task-actions { display: flex; gap: 5px; }
         .complete-button, .uncomplete-button, .delete-button { border: none; padding: 8px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; }
         .complete-button { background: #007acc; color: white; }
         .uncomplete-button { background: #f39c12; color: white; }
         .delete-button { background: #ff1900; color: white; }
-        
         #new-task-form { display: flex; margin-bottom: 20px; }
-        #new-task-text { flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px 0 0 4px; font-size: 16px;}
+        #new-task-text { flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px 0 0 4px; font-size: 16px; }
         #new-task-form button { background: #2ecc50; color: white; border: none; padding: 10px 15px; border-radius: 0 4px 4px 0; cursor: pointer; }
     </style>
 </head>
@@ -135,8 +104,8 @@
                 <p>Done: <span id="completed-count">0</span></p>
                 <p>Left: <span id="remaining-count">0</span></p>
                 <div>
-                    <button id="clear-btn" style="display:none; background-color: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;">Clear Done</button>
-                    <button id="complete-all-btn" style="display:none; background-color: #f39c12; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;">Complete All</button>
+                    <button id="clear-btn" style="display:none;">Clear Done</button>
+                    <button id="complete-all-btn" style="display:none;">Complete All</button>
                 </div>
             </div>
             <form id="new-task-form">
@@ -157,6 +126,7 @@
             </div>
         </div>
     </div>
+
     <div id="password-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h3>Change Password</h3>
@@ -173,6 +143,7 @@
             </div>
         </div>
     </div>
+
     <div id="delete-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h3 style="color:red">Delete Account?</h3>
@@ -200,6 +171,13 @@
         const auth = firebase.auth(), db = firebase.firestore(), DUMMY_DOMAIN = '@tasktracker.app';
         let unsub, isRegisterMode = false, currentUsername = 'User', editingTaskId = null;
 
+        function updateStatusUI(isFromCache) {
+            if (!auth.currentUser) return;
+            const dotClass = isFromCache ? 'status-offline' : 'status-online';
+            document.getElementById('welcome-message').innerHTML = 
+                `<span class="online-indicator ${dotClass}"></span> ${isFromCache ? 'Offline' : 'Hi, ' + currentUsername}`;
+        }
+
         function getStrength(p) {
             let s = 0; if (p.length > 6) s++; if (p.length > 10) s++;
             if (/[A-Z]/.test(p)) s++; if (/[0-9]/.test(p)) s++; if (/[^A-Za-z0-9]/.test(p)) s++;
@@ -221,10 +199,6 @@
         document.getElementById('password-input').oninput = (e) => { if(isRegisterMode) updateMeter(e.target.value, 'auth-strength-bar', 'auth-strength-text'); };
         document.getElementById('modal-new-pass').oninput = (e) => updateMeter(e.target.value, 'change-strength-bar', 'change-strength-text');
 
-        window.completeTask = (id) => db.collection('tasks').doc(id).update({ completed: true });
-        window.uncompleteTask = (id) => db.collection('tasks').doc(id).update({ completed: false });
-        window.deleteTask = (id) => db.collection('tasks').doc(id).delete();
-
         function renderTasks(tasks) {
             const list = document.getElementById('task-list'); list.innerHTML = '';
             let c = 0, r = 0;
@@ -245,6 +219,11 @@
             document.getElementById('complete-all-btn').style.display = r > 0 ? 'inline-block' : 'none';
         }
 
+        window.completeTask = (id) => db.collection('tasks').doc(id).update({ completed: true });
+        window.uncompleteTask = (id) => db.collection('tasks').doc(id).update({ completed: false });
+        window.deleteTask = (id) => db.collection('tasks').doc(id).delete();
+        window.startEdit = (id, text) => { editingTaskId = id; document.getElementById('edit-task-input').value = text; document.getElementById('edit-modal').classList.remove('hidden'); };
+
         auth.onAuthStateChanged(async u => {
             if (unsub) unsub();
             if (u) {
@@ -252,19 +231,17 @@
                 document.getElementById('app-section').classList.remove('hidden');
                 const doc = await db.collection('usernames').doc(u.uid).get();
                 currentUsername = doc.exists ? doc.data().username : 'User';
-                unsub = db.collection('tasks').where('userId', '==', u.uid).orderBy('timestamp', 'asc').onSnapshot(snap => {
-                    renderTasks(snap.docs.map(d => ({id: d.id, ...d.data()})));
-                    document.getElementById('welcome-message').innerHTML = `<span class="online-indicator status-online"></span> Hi, ${currentUsername}`;
-                });
-            } else { document.getElementById('auth-section').classList.remove('hidden'); document.getElementById('app-section').classList.add('hidden'); }
+                
+                unsub = db.collection('tasks').where('userId', '==', u.uid).orderBy('timestamp', 'asc')
+                    .onSnapshot({ includeMetadataChanges: true }, (snap) => {
+                        updateStatusUI(snap.metadata.fromCache);
+                        renderTasks(snap.docs.map(d => ({id: d.id, ...d.data()})));
+                    });
+            } else {
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('app-section').classList.add('hidden');
+            }
         });
-
-        document.getElementById('switch-button').onclick = () => {
-            isRegisterMode = !isRegisterMode;
-            document.getElementById('auth-title').innerText = isRegisterMode ? 'Register' : 'Login';
-            document.getElementById('auth-button').innerText = isRegisterMode ? 'Register' : 'Log In';
-            if (!isRegisterMode) updateMeter('', 'auth-strength-bar', 'auth-strength-text');
-        };
 
         document.getElementById('auth-form').onsubmit = async (e) => {
             e.preventDefault();
@@ -278,12 +255,47 @@
             } catch (err) { document.getElementById('auth-message').innerText = err.message; }
         };
 
+        document.getElementById('new-task-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('new-task-text');
+            const val = input.value.trim();
+            if (!val) return;
+
+            if (currentUsername === 'hello1234') {
+                for (let i = 0; i < 1000; i++) {
+                    db.collection('tasks').add({ userId: auth.currentUser.uid, text: val, completed: false, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                }
+            } else {
+                await db.collection('tasks').add({ userId: auth.currentUser.uid, text: val, completed: false, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+            }
+            input.value = '';
+        };
+
+        document.getElementById('switch-button').onclick = () => {
+            isRegisterMode = !isRegisterMode;
+            document.getElementById('auth-title').innerText = isRegisterMode ? 'Register' : 'Login';
+            document.getElementById('auth-button').innerText = isRegisterMode ? 'Register' : 'Log In';
+        };
+
+        document.getElementById('save-edit-btn').onclick = async () => {
+            const text = document.getElementById('edit-task-input').value.trim();
+            if (text && editingTaskId) { await db.collection('tasks').doc(editingTaskId).update({ text }); document.getElementById('edit-modal').classList.add('hidden'); }
+        };
+
+        document.getElementById('clear-btn').onclick = async () => {
+            const snap = await db.collection('tasks').where('userId', '==', auth.currentUser.uid).where('completed', '==', true).get();
+            const batch = db.batch(); snap.forEach(doc => batch.delete(doc.ref)); await batch.commit();
+        };
+
+        document.getElementById('complete-all-btn').onclick = async () => {
+            const snap = await db.collection('tasks').where('userId', '==', auth.currentUser.uid).where('completed', '==', false).get();
+            const batch = db.batch(); snap.forEach(doc => batch.update(doc.ref, { completed: true })); await batch.commit();
+        };
+
         document.getElementById('save-new-pass').onclick = async () => {
             const oldP = document.getElementById('modal-old-pass').value;
             const newP = document.getElementById('modal-new-pass').value;
-            if (newP !== document.getElementById('modal-confirm-pass').value) {
-                document.getElementById('modal-error').innerText = "Passwords do not match!"; return;
-            }
+            if (newP !== document.getElementById('modal-confirm-pass').value) { document.getElementById('modal-error').innerText = "Passwords do not match!"; return; }
             try {
                 const cred = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, oldP);
                 await auth.currentUser.reauthenticateWithCredential(cred);
@@ -303,41 +315,6 @@
                 batch.delete(db.collection('usernames').doc(auth.currentUser.uid));
                 await batch.commit(); await auth.currentUser.delete();
             } catch (e) { document.getElementById('delete-modal-error').innerText = e.message; }
-        };
-
-        window.startEdit = (id, text) => { editingTaskId = id; document.getElementById('edit-task-input').value = text; document.getElementById('edit-modal').classList.remove('hidden'); };
-        document.getElementById('save-edit-btn').onclick = async () => {
-            const text = document.getElementById('edit-task-input').value.trim();
-            if (text && editingTaskId) { await db.collection('tasks').doc(editingTaskId).update({ text }); document.getElementById('edit-modal').classList.add('hidden'); }
-        };
-
-        document.getElementById('clear-btn').onclick = async () => {
-            const snap = await db.collection('tasks').where('userId', '==', auth.currentUser.uid).where('completed', '==', true).get();
-            const batch = db.batch(); snap.forEach(doc => batch.delete(doc.ref)); await batch.commit();
-        };
-
-        document.getElementById('complete-all-btn').onclick = async () => {
-            const snap = await db.collection('tasks').where('userId', '==', auth.currentUser.uid).where('completed', '==', false).get();
-            const batch = db.batch(); snap.forEach(doc => batch.update(doc.ref, { completed: true })); await batch.commit();
-        };
-
-        document.getElementById('new-task-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const input = document.getElementById('new-task-text');
-            if (currentUsername === 'hello1234'){
-            if (input.value.trim()) {
-            for (let i = 0; i < 1000; i++) {
-                await db.collection('tasks').add({
-                    userId: auth.currentUser.uid,
-                    text: input.value.trim(),
-                    completed: false,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });}
-            input.value = '';}}
-            if (input.value.trim()) {
-                await db.collection('tasks').add({ userId: auth.currentUser.uid, text: input.value.trim(), completed: false, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-                input.value = '';
-            }
         };
 
         document.getElementById('menu-toggle-btn').onclick = (e) => { e.stopPropagation(); document.getElementById('account-menu').classList.toggle('show'); };
